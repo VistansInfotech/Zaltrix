@@ -11,11 +11,19 @@ import {
   LanguagePreference,
   SUPPORTED_LANGUAGES,
 } from '../../i18n';
-import { colors, radius, spacing, typography } from '../../theme';
+import {
+  AppColors,
+  radius,
+  spacing,
+  typography,
+  useColors,
+  useThemedStyles,
+} from '../../theme';
 
 export default function LanguageScreen() {
   const { t, languagePreference, setLanguage, rtlRestartRequired } =
     usePreferences();
+  const styles = useThemedStyles(makeStyles);
 
   const deviceLanguage = detectDeviceLanguage();
   const deviceName =
@@ -75,6 +83,9 @@ function LanguageOption({
   onPress: () => void;
   last?: boolean;
 }) {
+  const colors = useColors();
+  const styles = useThemedStyles(makeStyles);
+
   return (
     <Pressable
       onPress={onPress}
@@ -111,47 +122,48 @@ function LanguageOption({
   );
 }
 
-const styles = StyleSheet.create({
-  content: { paddingHorizontal: spacing.xl, paddingTop: spacing.lg },
-  subtitle: {
-    ...typography.body,
-    color: colors.textSecondary,
-    marginBottom: spacing.xl,
-  },
-  bannerWrap: { marginBottom: spacing.lg },
+const makeStyles = (c: AppColors) =>
+  StyleSheet.create({
+    content: { paddingHorizontal: spacing.xl, paddingTop: spacing.lg },
+    subtitle: {
+      ...typography.body,
+      color: c.textSecondary,
+      marginBottom: spacing.xl,
+    },
+    bannerWrap: { marginBottom: spacing.lg },
 
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md + 2,
-    minHeight: 62,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
-  },
-  rowLast: { borderBottomWidth: 0 },
-  rowPressed: { backgroundColor: colors.surfaceAlt },
-  rowText: { flex: 1, gap: 2 },
-  rowTitle: { ...typography.bodyStrong, color: colors.textPrimary, fontSize: 16 },
-  rowTitleSelected: { color: colors.primary },
-  rowSubtitle: { ...typography.caption, color: colors.textSecondary },
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.md,
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.md + 2,
+      minHeight: 62,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: c.border,
+    },
+    rowLast: { borderBottomWidth: 0 },
+    rowPressed: { backgroundColor: c.surfaceAlt },
+    rowText: { flex: 1, gap: 2 },
+    rowTitle: { ...typography.bodyStrong, color: c.textPrimary, fontSize: 16 },
+    rowTitleSelected: { color: c.primary },
+    rowSubtitle: { ...typography.caption, color: c.textSecondary },
 
-  check: {
-    width: 24,
-    height: 24,
-    borderRadius: radius.pill,
-    borderWidth: 1.5,
-    borderColor: colors.borderStrong,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  checkOn: { backgroundColor: colors.primary, borderColor: colors.primary },
+    check: {
+      width: 24,
+      height: 24,
+      borderRadius: radius.pill,
+      borderWidth: 1.5,
+      borderColor: c.borderStrong,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    checkOn: { backgroundColor: c.primary, borderColor: c.primary },
 
-  hint: {
-    ...typography.caption,
-    color: colors.textTertiary,
-    marginTop: spacing.lg,
-    textAlign: 'center',
-  },
-});
+    hint: {
+      ...typography.caption,
+      color: c.textTertiary,
+      marginTop: spacing.lg,
+      textAlign: 'center',
+    },
+  });

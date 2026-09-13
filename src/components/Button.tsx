@@ -9,7 +9,7 @@ import {
   ViewStyle,
 } from 'react-native';
 
-import { colors, radius, spacing, typography } from '../theme';
+import { AppColors, radius, spacing, typography, useColors } from '../theme';
 import Icon, { IconName } from './Icon';
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
@@ -35,8 +35,9 @@ export default function Button({
   fullWidth = true,
   style,
 }: Props) {
+  const colors = useColors();
   const inactive = disabled || loading;
-  const scheme = schemes[variant];
+  const scheme = variantSchemes(colors)[variant];
 
   return (
     <Pressable
@@ -69,28 +70,30 @@ export default function Button({
   );
 }
 
-const schemes: Record<Variant, { background: string; border: string; text: string }> = {
+const variantSchemes = (
+  c: AppColors,
+): Record<Variant, { background: string; border: string; text: string }> => ({
   primary: {
-    background: colors.primary,
-    border: colors.primary,
-    text: colors.textOnPrimary,
+    background: c.primary,
+    border: c.primary,
+    text: c.textOnPrimary,
   },
   secondary: {
-    background: colors.surface,
-    border: colors.borderStrong,
-    text: colors.primary,
+    background: c.surface,
+    border: c.borderStrong,
+    text: c.primary,
   },
   ghost: {
     background: 'transparent',
     border: 'transparent',
-    text: colors.primary,
+    text: c.primary,
   },
   danger: {
-    background: colors.dangerSoft,
-    border: colors.dangerSoft,
-    text: colors.danger,
+    background: c.dangerSoft,
+    border: c.dangerSoft,
+    text: c.danger,
   },
-};
+});
 
 const styles = StyleSheet.create({
   base: {

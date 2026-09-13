@@ -57,7 +57,7 @@ react {
 /**
  * Set this to true to Run Proguard on Release builds to minify the Java bytecode.
  */
-def enableProguardInReleaseBuilds = false
+def enableProguardInReleaseBuilds = true
 
 /**
  * The preferred build flavor of JavaScriptCore (JSC)
@@ -72,6 +72,24 @@ def enableProguardInReleaseBuilds = false
  */
 def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
 
+/**
+ * ABIs to package, from the `reactNativeArchitectures` gradle property.
+ */
+def reactNativeArchitectures() {
+    def value = project.getProperties().get("reactNativeArchitectures")
+    return value ? value.split(",") : ["armeabi-v7a", "arm64-v8a", "x86", "x86_64"]
+}
+
+/**
+ * True when this invocation is building an Android App Bundle.
+ *
+ * An .aab performs its own per-ABI splitting, so the `splits` block below must
+ * be off for bundle tasks — AGP fails the build outright if both are active.
+ */
+def isBundleBuild = gradle.startParameter.taskNames.any {
+    it.toLowerCase().contains("bundle")
+}
+
 android {
     ndkVersion rootProject.ext.ndkVersion
     buildToolsVersion rootProject.ext.buildToolsVersion
@@ -84,6 +102,9 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
+        // Ship only the languages the app actually translates. Without this the
+        // build carries AndroidX and Play-services strings for ~80 locales.
+        resourceConfigurations += ["en", "es", "hi", "ar"]
     }
     signingConfigs {
         debug {
@@ -91,6 +112,28 @@ android {
             storePassword 'android'
             keyAlias 'androiddebugkey'
             keyPassword 'android'
+        }
+    }
+    /**
+     * One ABI per APK instead of all four in a single file.
+     *
+     * The camera, ML Kit and TensorFlow Lite native libraries are large. Packed
+     * for every ABI at once a debug APK reaches ~292MB, of which any one device
+     * can use roughly a quarter — big enough to fail installation on an emulator
+     * with a default-sized disk ("INSTALL_FAILED_INSUFFICIENT_STORAGE"). With
+     * splits, each APK carries only the ABI that will actually run (~88MB) and
+     * `installDebug` picks the right one for the connected device.
+     *
+     * Release distribution should use `bundleRelease` (an Android App Bundle),
+     * which performs its own per-device splitting — so splitting is switched
+     * off automatically for bundle tasks.
+     */
+    splits {
+        abi {
+            reset()
+            enable !isBundleBuild
+            universalApk false
+            include(*reactNativeArchitectures())
         }
     }
     buildTypes {
@@ -102,6 +145,9 @@ android {
             // see https://reactnative.dev/docs/signed-apk-android.
             signingConfig signingConfigs.debug
             minifyEnabled enableProguardInReleaseBuilds
+            // Drops resources no kept reference reaches; see res/raw/keep.xml
+            // for the JS-loaded assets that must survive it.
+            shrinkResources enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
         }
     }

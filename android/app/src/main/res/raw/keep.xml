@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Metro copies JS-required assets (the face-embedding model, the attendance
+  chimes, the logo PNGs) into res/ with generated names, and React Native looks
+  them up by name at runtime. The resource shrinker sees no compile-time
+  reference to any of them and would strip them, so they are pinned here.
+-->
+<resources
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:keep="@raw/*,@drawable/*"
+    tools:shrinkMode="safe" />

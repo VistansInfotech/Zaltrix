@@ -20,7 +20,15 @@ import {
   getNotificationStatus,
   NotificationStatus,
 } from '../../services/notificationService';
-import { colors, spacing, typography } from '../../theme';
+import {
+  AppColors,
+  radius,
+  spacing,
+  typography,
+  useTheme,
+  useColors,
+  useThemedStyles,
+} from '../../theme';
 import type { SettingsStackScreenProps } from '../../navigation/types';
 
 export default function SettingsScreen({
@@ -28,6 +36,9 @@ export default function SettingsScreen({
 }: SettingsStackScreenProps<'SettingsHome'>) {
   const { t, language, languagePreference } = usePreferences();
   const { user, security, logout } = useAuth();
+  const { preference: themePreference } = useTheme();
+  const colors = useColors();
+  const styles = useThemedStyles(makeStyles);
 
   const [notifStatus, setNotifStatus] = useState<NotificationStatus>('not_asked');
   const [capability, setCapability] = useState<BiometricCapability | null>(null);
@@ -45,6 +56,8 @@ export default function SettingsScreen({
 
   const version = DeviceInfo.getVersion();
   const build = DeviceInfo.getBuildNumber();
+
+  const appearanceName = t(`appearance.${themePreference}`);
 
   const languageName =
     languagePreference === 'system'
@@ -96,6 +109,7 @@ export default function SettingsScreen({
           <Avatar
             name={user?.name ?? '?'}
             size={60}
+            uri={user?.avatar}
             label={t('profile.initialsAlt')}
           />
           <View style={styles.profileText}>
@@ -105,12 +119,27 @@ export default function SettingsScreen({
             <Text style={styles.profileEmail} numberOfLines={1}>
               {user?.email}
             </Text>
+            {user?.position ? (
+              <Text style={styles.profilePosition} numberOfLines={1}>
+                {user.position}
+              </Text>
+            ) : null}
+            <Text style={styles.profileMeta} numberOfLines={1}>
+              {t('profile.userId')} · {user?.id ?? '—'}
+            </Text>
+            {user?.phone ? (
+              <Text style={styles.profileMeta} numberOfLines={1}>
+                {t('profile.phone')} · {user.phone}
+              </Text>
+            ) : null}
           </View>
         </View>
 
         <SettingsRow
           icon="user"
           label={t('settings.profile')}
+          tint={colors.primary}
+          tintSoft={colors.primarySoft}
           subtitle={t('settings.profileSubtitle')}
           onPress={() => navigation.navigate('Profile')}
           last
@@ -122,12 +151,24 @@ export default function SettingsScreen({
       <Card flush>
         <SettingsRow
           icon="globe"
+          tint={colors.info}
+          tintSoft={colors.infoSoft}
           label={t('settings.language')}
           value={languageName}
           onPress={() => navigation.navigate('Language')}
         />
         <SettingsRow
+          icon="contrast"
+          tint={colors.accent}
+          tintSoft={colors.accentSoft}
+          label={t('settings.appearance')}
+          value={appearanceName}
+          onPress={() => navigation.navigate('Appearance')}
+        />
+        <SettingsRow
           icon="bell"
+          tint={colors.warning}
+          tintSoft={colors.warningSoft}
           label={t('settings.notifications')}
           subtitle={t('settings.notificationsSubtitle')}
           value={notifLabel[notifStatus]}
@@ -141,6 +182,8 @@ export default function SettingsScreen({
       <Card flush>
         <SettingsRow
           icon="shield"
+          tint={colors.success}
+          tintSoft={colors.successSoft}
           label={t('settings.security')}
           subtitle={t('settings.securitySubtitle')}
           value={securitySummary}
@@ -154,6 +197,8 @@ export default function SettingsScreen({
       <Card flush>
         <SettingsRow
           icon="fileText"
+          tint={colors.info}
+          tintSoft={colors.infoSoft}
           label={t('settings.terms')}
           onPress={() => navigation.navigate('Terms')}
           last
@@ -174,7 +219,8 @@ export default function SettingsScreen({
 
       {/* ------------------------------- about ------------------------------ */}
       <View style={styles.about}>
-        <Logo variant="horizontalLight" width={132} />
+        <Logo variant="horizontal" width={168} />
+        <Text style={styles.tagline}>{t('settings.appTagline')}</Text>
         <Text style={styles.version}>
           {t('settings.version', { version, build })}
         </Text>
@@ -186,37 +232,57 @@ export default function SettingsScreen({
   );
 }
 
-const styles = StyleSheet.create({
-  content: { paddingHorizontal: spacing.xl },
-  screenTitle: {
-    ...typography.display,
-    color: colors.textPrimary,
-    paddingTop: spacing.md,
-    marginBottom: spacing.xl,
-  },
-  profileCard: { overflow: 'hidden' },
-  profileTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.lg,
-    padding: spacing.lg,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
-  },
-  profileText: { flex: 1, gap: 3 },
-  profileName: { ...typography.subtitle, color: colors.textPrimary },
-  profileEmail: { ...typography.caption, color: colors.textSecondary },
+const makeStyles = (c: AppColors) =>
+  StyleSheet.create({
+    content: { paddingHorizontal: spacing.xl },
+    screenTitle: {
+      ...typography.display,
+      color: c.textPrimary,
+      paddingTop: spacing.md,
+      marginBottom: spacing.xl,
+    },
+    profileCard: { overflow: 'hidden' },
+    profileTop: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.lg,
+      padding: spacing.lg,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: c.border,
+    },
+    profileText: { flex: 1, gap: 3 },
+    profileName: { ...typography.subtitle, color: c.textPrimary },
+    profileEmail: { ...typography.caption, color: c.textSecondary },
+    profilePosition: {
+      ...typography.caption,
+      color: c.primary,
+      fontWeight: '600',
+    },
+    profileMeta: { ...typography.caption, color: c.textTertiary, fontSize: 11 },
 
-  about: {
-    alignItems: 'center',
-    gap: spacing.xs,
-    marginTop: spacing.xxl,
-    paddingTop: spacing.lg,
-  },
-  version: {
-    ...typography.caption,
-    color: colors.textTertiary,
-    marginTop: spacing.sm,
-  },
-  copyright: { ...typography.caption, color: colors.textTertiary, fontSize: 11 },
-});
+    about: {
+      alignItems: 'center',
+      gap: spacing.xs,
+      marginTop: spacing.xxl,
+      paddingTop: spacing.lg,
+    },
+    tagline: {
+      ...typography.overline,
+      color: c.accentStrong,
+      textAlign: 'center',
+      alignSelf: 'center',
+      // Small, wide-tracked and only semi-bold: a quiet footer line rather
+      // than a second headline competing with the wordmark above it.
+      fontSize: 8,
+      lineHeight: 12,
+      letterSpacing: 1.1,
+      fontWeight: '600',
+      marginTop: spacing.xs,
+    },
+    version: {
+      ...typography.caption,
+      color: c.textTertiary,
+      marginTop: spacing.sm,
+    },
+    copyright: { ...typography.caption, color: c.textTertiary, fontSize: 11 },
+  });

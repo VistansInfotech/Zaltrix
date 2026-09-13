@@ -15,9 +15,11 @@ import {
   openSystemSettings,
   requestNotificationPermission,
 } from '../../services/notificationService';
-import { colors, spacing, typography } from '../../theme';
+import { AppColors, spacing, typography, useColors, useThemedStyles } from '../../theme';
 
 export default function NotificationsScreen() {
+  const colors = useColors();
+  const styles = useThemedStyles(makeStyles);
   const { t, notificationPrefs, setNotificationPref } = usePreferences();
 
   const [status, setStatus] = useState<NotificationStatus>('not_asked');
@@ -123,18 +125,19 @@ export default function NotificationsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  content: { paddingHorizontal: spacing.xl, paddingTop: spacing.lg },
-  subtitle: {
-    ...typography.body,
-    color: colors.textSecondary,
-    marginBottom: spacing.xl,
-  },
-  permissionArea: { gap: spacing.md, marginTop: spacing.lg },
-  disabledNote: {
-    ...typography.caption,
-    color: colors.textTertiary,
-    marginTop: spacing.md,
-    textAlign: 'center',
-  },
-});
+const makeStyles = (c: AppColors) =>
+  StyleSheet.create({
+    content: { paddingHorizontal: spacing.xl, paddingTop: spacing.lg },
+    subtitle: {
+      ...typography.body,
+      color: c.textSecondary,
+      marginBottom: spacing.xl,
+    },
+    permissionArea: { gap: spacing.md, marginTop: spacing.lg },
+    disabledNote: {
+      ...typography.caption,
+      color: c.textTertiary,
+      marginTop: spacing.md,
+      textAlign: 'center',
+    },
+  });

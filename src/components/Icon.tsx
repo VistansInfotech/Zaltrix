@@ -1,7 +1,7 @@
 import React from 'react';
 import Svg, { Circle, Line, Path, Rect } from 'react-native-svg';
 
-import { colors } from '../theme';
+import { useColors } from '../theme';
 
 export type IconName =
   | 'feed'
@@ -24,11 +24,14 @@ export type IconName =
   | 'alert'
   | 'backspace'
   | 'info'
+  | 'contrast'
+  | 'camera'
   | 'external';
 
 type Props = {
   name: IconName;
   size?: number;
+  /** Defaults to the active scheme's primary text colour. */
   color?: string;
   /** Stroke weight; 2 reads well at 24px, 1.75 at larger sizes. */
   strokeWidth?: number;
@@ -41,11 +44,14 @@ type Props = {
 export default function Icon({
   name,
   size = 24,
-  color = colors.textPrimary,
+  color,
   strokeWidth = 2,
 }: Props) {
+  const themeColors = useColors();
+  const resolved = color ?? themeColors.textPrimary;
+
   const common = {
-    stroke: color,
+    stroke: resolved,
     strokeWidth,
     strokeLinecap: 'round' as const,
     strokeLinejoin: 'round' as const,
@@ -54,7 +60,7 @@ export default function Icon({
 
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24">
-      {renderPaths(name, common, color)}
+      {renderPaths(name, common, resolved)}
     </Svg>
   );
 }
@@ -208,6 +214,24 @@ function renderPaths(
           <Path d="M21 4H8L2 12l6 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z" {...p} />
           <Line x1="17" y1="9" x2="11" y2="15" {...p} />
           <Line x1="11" y1="9" x2="17" y2="15" {...p} />
+        </>
+      );
+    case 'camera':
+      return (
+        <>
+          <Path
+            d="M3 8.5A2.5 2.5 0 0 1 5.5 6h1.9l1.2-2h6.8l1.2 2h1.9A2.5 2.5 0 0 1 21 8.5v9A2.5 2.5 0 0 1 18.5 20h-13A2.5 2.5 0 0 1 3 17.5z"
+            {...p}
+          />
+          <Circle cx="12" cy="13" r="3.6" {...p} />
+        </>
+      );
+    case 'contrast':
+      // Half-filled disc — the conventional light/dark appearance glyph.
+      return (
+        <>
+          <Circle cx="12" cy="12" r="9" {...p} />
+          <Path d="M12 3a9 9 0 0 1 0 18z" fill={color} stroke="none" />
         </>
       );
     case 'external':

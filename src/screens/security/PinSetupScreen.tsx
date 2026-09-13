@@ -9,7 +9,7 @@ import Screen from '../../components/Screen';
 import { useAuth } from '../../context/AuthContext';
 import { usePreferences } from '../../context/PreferencesContext';
 import { savePin } from '../../services/secureStore';
-import { colors, radius, spacing, typography } from '../../theme';
+import { AppColors, radius, spacing, typography, useColors, useThemedStyles } from '../../theme';
 import { isWeakPin } from '../../utils/validation';
 
 type Stage = 'create' | 'confirm';
@@ -26,6 +26,8 @@ type Props = {
  * "change PIN" flow in Settings.
  */
 export default function PinSetupScreen({ mode, onDone, onBack }: Props) {
+  const colors = useColors();
+  const styles = useThemedStyles(makeStyles);
   const { t } = usePreferences();
   const { completeSecuritySetup, updateSecurity } = useAuth();
   const insets = useSafeAreaInsets();
@@ -161,41 +163,42 @@ export default function PinSetupScreen({ mode, onDone, onBack }: Props) {
   );
 }
 
-const styles = StyleSheet.create({
-  content: { paddingHorizontal: spacing.xl },
-  header: { flexDirection: 'row', paddingVertical: spacing.sm },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: radius.sm,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginStart: -spacing.sm,
-  },
-  pressed: { backgroundColor: colors.surfaceAlt },
-  prompt: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.sm },
-  lockChip: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: colors.primarySoft,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing.sm,
-  },
-  title: { ...typography.title, color: colors.textPrimary, textAlign: 'center' },
-  subtitle: {
-    ...typography.body,
-    color: colors.textSecondary,
-    textAlign: 'center',
-  },
-  dotsWrap: { marginTop: spacing.xl },
-  // Fixed height keeps the keypad from jumping when an error appears.
-  errorSlot: {
-    height: 64,
-    justifyContent: 'center',
-    alignSelf: 'stretch',
-    marginTop: spacing.md,
-  },
-  padWrap: { alignItems: 'center' },
-});
+const makeStyles = (c: AppColors) =>
+  StyleSheet.create({
+    content: { paddingHorizontal: spacing.xl },
+    header: { flexDirection: 'row', paddingVertical: spacing.sm },
+    backButton: {
+      width: 40,
+      height: 40,
+      borderRadius: radius.sm,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginStart: -spacing.sm,
+    },
+    pressed: { backgroundColor: c.surfaceAlt },
+    prompt: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.sm },
+    lockChip: {
+      width: 60,
+      height: 60,
+      borderRadius: 30,
+      backgroundColor: c.primarySoft,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: spacing.sm,
+    },
+    title: { ...typography.title, color: c.textPrimary, textAlign: 'center' },
+    subtitle: {
+      ...typography.body,
+      color: c.textSecondary,
+      textAlign: 'center',
+    },
+    dotsWrap: { marginTop: spacing.xl },
+    // Fixed height keeps the keypad from jumping when an error appears.
+    errorSlot: {
+      height: 64,
+      justifyContent: 'center',
+      alignSelf: 'stretch',
+      marginTop: spacing.md,
+    },
+    padWrap: { alignItems: 'center' },
+  });

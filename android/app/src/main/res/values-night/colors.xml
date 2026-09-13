@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Matches palette.ink900 in src/theme/colors.ts. -->
+    <color name="window_background">#0F0B13</color>
+</resources>

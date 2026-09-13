@@ -19,7 +19,9 @@ import {
   SecurityConfig,
   UnlockMethod,
   User,
+  UserRole,
 } from '../types';
+import { DEFAULT_ROLE } from '../types';
 
 type Result = { ok: true } | { ok: false; error: AuthError };
 
@@ -27,13 +29,18 @@ type AuthValue = {
   status: AppStatus;
   user: User | null;
   security: SecurityConfig;
-  signUp: (name: string, email: string, password: string) => Promise<Result>;
+  signUp: (
+    name: string,
+    email: string,
+    password: string,
+    role?: UserRole,
+  ) => Promise<Result>;
   login: (email: string, password: string) => Promise<Result>;
   logout: () => Promise<void>;
   /** Marks security setup complete and moves the app to the dashboard. */
   completeSecuritySetup: (config: Partial<SecurityConfig>) => Promise<void>;
   updateSecurity: (config: Partial<SecurityConfig>) => Promise<void>;
-  updateProfile: (patch: Partial<Pick<User, 'name'>>) => Promise<void>;
+  updateProfile: (patch: Partial<Pick<User, 'name' | 'avatar' | 'phone' | 'position'>>) => Promise<void>;
   unlock: () => void;
   lock: () => void;
 };
@@ -66,13 +73,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       setSecurity(storedSecurity);
 
-      if (!storedUser || !hasSession) {
-        setUser(storedUser);
+      // One-time migration for accounts created before roles existed.
+      //
+      // Those accounts already had the run of the app, so leaving them without
+      // a role would quietly take capability away from someone who had it.
+      // Only an account with no role at all is upgraded — a stored 'user' is a
+      // deliberate choice and is never promoted.
+      const migrated =
+        storedUser && storedUser.role === undefined
+          ? { ...storedUser, role: 'admin' as const }
+          : storedUser;
+      if (migrated !== storedUser) {
+        await writeJSON(StorageKeys.user, migrated);
+      }
+
+      if (!migrated || !hasSession) {
+        setUser(migrated);
         setStatus('signedOut');
         return;
       }
 
-      setUser(storedUser);
+      setUser(migrated);
 
       if (!storedSecurity.configured) {
         setStatus('needsSecurity');
@@ -117,7 +138,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   /* -------------------------------- auth -------------------------------- */
 
   const signUp = useCallback(
-    async (name: string, email: string, password: string): Promise<Result> => {
+    async (
+      name: string,
+      email: string,
+      password: string,
+      role: UserRole = DEFAULT_ROLE,
+    ): Promise<Result> => {
       const normalised = email.trim().toLowerCase();
       const existing = await secure.hasStoredAccount();
 
@@ -137,6 +163,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         name: name.trim(),
         email: normalised,
         createdAt: new Date().toISOString(),
+        role,
       };
 
       await Promise.all([
@@ -168,6 +195,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         name: normalised.split('@')[0],
         email: normalised,
         createdAt: new Date().toISOString(),
+        // Reconstructed on login when the stored record is missing. It gets
+        // the ordinary role: inventing an admin here would hand out the
+        // enrolment tools to an account nobody granted them to.
+        role: DEFAULT_ROLE,
       };
 
       const storedSecurity = await readJSON<SecurityConfig>(
@@ -228,7 +259,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   const updateProfile = useCallback(
-    async (patch: Partial<Pick<User, 'name'>>) => {
+    async (patch: Partial<Pick<User, 'name' | 'avatar' | 'phone' | 'position'>>) => {
       setUser(prev => {
         if (!prev) {
           return prev;

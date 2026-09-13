@@ -8,15 +8,28 @@ import {
   View,
 } from 'react-native';
 
-import { colors, radius, spacing, typography } from '../theme';
+import {
+  AppColors,
+  radius,
+  spacing,
+  typography,
+  useColors,
+  useThemedStyles,
+} from '../theme';
 import Icon, { IconName } from './Icon';
 
 type BaseProps = {
   icon?: IconName;
   label: string;
   subtitle?: string;
-  /** Tint for the leading icon chip; defaults to brand purple. */
+  /**
+   * Colour of the leading icon; defaults to brand purple. Pass `tintSoft`
+   * alongside it — a tinted glyph on the default purple chip reads as a
+   * mistake rather than a choice.
+   */
   tint?: string;
+  /** Fill behind the leading icon; defaults to soft brand purple. */
+  tintSoft?: string;
   destructive?: boolean;
   /** Hides the hairline under the last row of a group. */
   last?: boolean;
@@ -31,11 +44,14 @@ type Props = BaseProps &
   );
 
 export default function SettingsRow(props: Props) {
+  const colors = useColors();
+  const styles = useThemedStyles(makeStyles);
   const {
     icon,
     label,
     subtitle,
     tint = colors.primary,
+    tintSoft = colors.primarySoft,
     destructive = false,
     last = false,
     disabled = false,
@@ -43,7 +59,7 @@ export default function SettingsRow(props: Props) {
 
   const labelColor = destructive ? colors.danger : colors.textPrimary;
   const iconTint = destructive ? colors.danger : tint;
-  const iconBg = destructive ? colors.dangerSoft : colors.primarySoft;
+  const iconBg = destructive ? colors.dangerSoft : tintSoft;
 
   const body = (
     <View style={[styles.row, last && styles.rowLast, disabled && styles.disabled]}>
@@ -64,7 +80,7 @@ export default function SettingsRow(props: Props) {
         ) : null}
       </View>
 
-      {renderTrailing(props)}
+      {renderTrailing(props, colors, styles)}
     </View>
   );
 
@@ -85,7 +101,11 @@ export default function SettingsRow(props: Props) {
   );
 }
 
-function renderTrailing(props: Props): React.ReactNode {
+function renderTrailing(
+  props: Props,
+  colors: AppColors,
+  styles: ReturnType<typeof makeStyles>,
+): React.ReactNode {
   if (props.type === 'switch') {
     return (
       <Switch
@@ -121,34 +141,35 @@ function renderTrailing(props: Props): React.ReactNode {
   );
 }
 
-const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md + 2,
-    minHeight: 60,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
-  },
-  rowLast: { borderBottomWidth: 0 },
-  disabled: { opacity: 0.45 },
-  pressed: { backgroundColor: colors.surfaceAlt },
-  iconChip: {
-    width: 34,
-    height: 34,
-    borderRadius: radius.sm + 2,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  textBlock: { flex: 1, gap: 2 },
-  subtitle: { ...typography.caption, color: colors.textSecondary },
-  trailing: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    maxWidth: '45%',
-  },
-  value: { ...typography.caption, color: colors.textTertiary, flexShrink: 1 },
-});
+const makeStyles = (c: AppColors) =>
+  StyleSheet.create({
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.md,
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.md + 2,
+      minHeight: 60,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: c.border,
+    },
+    rowLast: { borderBottomWidth: 0 },
+    disabled: { opacity: 0.45 },
+    pressed: { backgroundColor: c.surfaceAlt },
+    iconChip: {
+      width: 34,
+      height: 34,
+      borderRadius: radius.sm + 2,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    textBlock: { flex: 1, gap: 2 },
+    subtitle: { ...typography.caption, color: c.textSecondary },
+    trailing: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs,
+      maxWidth: '45%',
+    },
+    value: { ...typography.caption, color: c.textTertiary, flexShrink: 1 },
+  });

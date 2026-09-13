@@ -3,8 +3,12 @@
 jest.mock('react-native-svg', () => {
   const React = require('react');
   const { View } = require('react-native');
+  // forwardRef, not a plain function: Animated.createAnimatedComponent needs a
+  // component it can attach a ref to, and the face guide animates a Rect.
   const stub = (name) => {
-    const C = (props) => React.createElement(View, { ...props, testID: name });
+    const C = React.forwardRef((props, ref) =>
+      React.createElement(View, { ...props, ref, testID: name }),
+    );
     C.displayName = name;
     return C;
   };
@@ -14,9 +18,13 @@ jest.mock('react-native-svg', () => {
     Svg: stub('Svg'),
     Path: stub('Path'),
     Circle: stub('Circle'),
+    Ellipse: stub('Ellipse'),
     Line: stub('Line'),
     Rect: stub('Rect'),
     G: stub('G'),
+    Defs: stub('Defs'),
+    Mask: stub('Mask'),
+    ClipPath: stub('ClipPath'),
   };
 });
 
@@ -76,3 +84,54 @@ jest.mock('@react-native-async-storage/async-storage', () => {
     },
   };
 });
+
+/* ---- attendance: camera, face detection, tflite and sound native stubs ---- */
+
+jest.mock('react-native-nitro-image', () => ({
+  Images: {
+    loadFromFileAsync: jest.fn(),
+  },
+  loadImage: jest.fn(),
+}));
+
+jest.mock('react-native-fast-tflite', () => ({
+  loadTensorflowModel: jest.fn().mockResolvedValue({
+    inputs: [{ name: 'input', dataType: 'float32', shape: [1, 112, 112, 3] }],
+    outputs: [{ name: 'embeddings', dataType: 'float32', shape: [1, 192] }],
+    delegates: [],
+    run: jest.fn().mockResolvedValue([new Float32Array(192).fill(0.1).buffer]),
+    runSync: jest.fn(),
+  }),
+}));
+
+jest.mock('react-native-vision-camera', () => ({
+  Camera: () => null,
+  useCameraDevice: () => undefined,
+  useCameraPermission: () => ({
+    hasPermission: true,
+    requestPermission: jest.fn().mockResolvedValue(true),
+    status: 'granted',
+    canRequestPermission: false,
+  }),
+  usePhotoOutput: () => ({ capturePhoto: jest.fn() }),
+  usePreviewOutput: () => ({}),
+}));
+
+jest.mock('react-native-vision-camera-face-detector', () => ({
+  useFaceDetectorOutput: () => ({}),
+  useImageFaceDetector: () => ({ detectFaces: jest.fn().mockReturnValue([]) }),
+  Camera: () => null,
+}));
+
+jest.mock('react-native-nitro-sound', () => ({
+  createSound: () => ({
+    startPlayer: jest.fn().mockResolvedValue(''),
+    stopPlayer: jest.fn().mockResolvedValue(''),
+    setVolume: jest.fn().mockResolvedValue(''),
+  }),
+}));
+
+jest.mock('react-native-image-picker', () => ({
+  launchCamera: jest.fn(),
+  launchImageLibrary: jest.fn(),
+}));

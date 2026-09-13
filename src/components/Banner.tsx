@@ -1,17 +1,26 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { colors, radius, spacing, typography } from '../theme';
+import {
+  AppColors,
+  radius,
+  spacing,
+  typography,
+  useColors,
+  useThemedStyles,
+} from '../theme';
 import Icon, { IconName } from './Icon';
 
 type Tone = 'info' | 'success' | 'warning' | 'danger';
 
-const tones: Record<Tone, { bg: string; fg: string; icon: IconName }> = {
-  info: { bg: colors.primarySoft, fg: colors.primaryDark, icon: 'info' },
-  success: { bg: colors.successSoft, fg: colors.success, icon: 'check' },
-  warning: { bg: colors.accentSoft, fg: '#7A5E10', icon: 'alert' },
-  danger: { bg: colors.dangerSoft, fg: colors.danger, icon: 'alert' },
-};
+const toneFor = (
+  c: AppColors,
+): Record<Tone, { bg: string; fg: string; icon: IconName }> => ({
+  info: { bg: c.primarySoft, fg: c.primaryDark, icon: 'info' },
+  success: { bg: c.successSoft, fg: c.success, icon: 'check' },
+  warning: { bg: c.accentSoft, fg: c.accentStrong, icon: 'alert' },
+  danger: { bg: c.dangerSoft, fg: c.danger, icon: 'alert' },
+});
 
 export default function Banner({
   tone = 'info',
@@ -20,7 +29,9 @@ export default function Banner({
   tone?: Tone;
   message: string;
 }) {
-  const scheme = tones[tone];
+  const colors = useColors();
+  const styles = useThemedStyles(makeStyles);
+  const scheme = toneFor(colors)[tone];
 
   return (
     <View
@@ -33,13 +44,14 @@ export default function Banner({
   );
 }
 
-const styles = StyleSheet.create({
-  banner: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: spacing.sm,
-    borderRadius: radius.md,
-    padding: spacing.md,
-  },
-  text: { ...typography.caption, flex: 1, lineHeight: 19 },
-});
+const makeStyles = (_c: AppColors) =>
+  StyleSheet.create({
+    banner: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      gap: spacing.sm,
+      borderRadius: radius.md,
+      padding: spacing.md,
+    },
+    text: { ...typography.caption, flex: 1, lineHeight: 19 },
+  });

@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import Screen from '../../components/Screen';
 import { usePreferences } from '../../context/PreferencesContext';
-import { colors, spacing, typography } from '../../theme';
+import { AppColors, spacing, typography, useThemedStyles } from '../../theme';
 import { formatLongDate } from '../../utils/format';
 
 const SECTIONS = ['s1', 's2', 's3', 's4', 's5', 's6', 's7', 's8'] as const;
@@ -12,6 +12,7 @@ const SECTIONS = ['s1', 's2', 's3', 's4', 's5', 's6', 's7', 's8'] as const;
 const LAST_UPDATED = new Date('2026-09-01T00:00:00Z');
 
 export default function TermsScreen() {
+  const styles = useThemedStyles(makeStyles);
   const { t, language } = usePreferences();
 
   const formattedDate = formatLongDate(LAST_UPDATED, language);
@@ -36,21 +37,22 @@ export default function TermsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  content: { paddingHorizontal: spacing.xl, paddingTop: spacing.lg },
-  updated: {
-    ...typography.caption,
-    color: colors.textTertiary,
-    marginBottom: spacing.lg,
-  },
-  intro: {
-    ...typography.body,
-    color: colors.textPrimary,
-    lineHeight: 24,
-    marginBottom: spacing.sm,
-  },
-  section: { marginTop: spacing.xl, gap: spacing.sm },
-  heading: { ...typography.subtitle, color: colors.textPrimary },
-  body: { ...typography.body, color: colors.textSecondary, lineHeight: 24 },
-  footer: { height: spacing.xxl },
-});
+const makeStyles = (c: AppColors) =>
+  StyleSheet.create({
+    content: { paddingHorizontal: spacing.xl, paddingTop: spacing.lg },
+    updated: {
+      ...typography.caption,
+      color: c.textTertiary,
+      marginBottom: spacing.lg,
+    },
+    intro: {
+      ...typography.body,
+      color: c.textPrimary,
+      lineHeight: 24,
+      marginBottom: spacing.sm,
+    },
+    section: { marginTop: spacing.xl, gap: spacing.sm },
+    heading: { ...typography.subtitle, color: c.textPrimary },
+    body: { ...typography.body, color: c.textSecondary, lineHeight: 24 },
+    footer: { height: spacing.xxl },
+  });

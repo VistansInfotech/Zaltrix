@@ -40,8 +40,14 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>Zaltrix uses the camera to register your face and to mark attendance. Face data is processed on this device and never uploaded.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Zaltrix uses Face ID to unlock your account quickly and keep it secure.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Zaltrix can save a photo you take to your library.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Zaltrix lets you choose a profile picture from your photo library. The picture stays on this device.</string>
 	<key>RCTNewArchEnabled</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

@@ -9,7 +9,14 @@ import {
   View,
 } from 'react-native';
 
-import { colors, radius, spacing, typography } from '../theme';
+import {
+  AppColors,
+  radius,
+  spacing,
+  typography,
+  useColors,
+  useThemedStyles,
+} from '../theme';
 import Icon from './Icon';
 
 type Props = TextInputProps & {
@@ -29,6 +36,8 @@ function TextFieldBase(
   { label, error, secure = false, showLabel, hideLabel, hint, style, ...rest }: Props,
   ref: React.ForwardedRef<TextFieldHandle>,
 ) {
+  const colors = useColors();
+  const styles = useThemedStyles(makeStyles);
   const [focused, setFocused] = useState(false);
   const [masked, setMasked] = useState(secure);
 
@@ -98,42 +107,43 @@ TextField.displayName = 'TextField';
 
 export default TextField;
 
-const styles = StyleSheet.create({
-  wrapper: { marginBottom: spacing.lg },
-  label: {
-    ...typography.caption,
-    color: colors.textSecondary,
-    marginBottom: spacing.xs + 2,
-    fontWeight: '600',
-  },
-  field: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.lg,
-    minHeight: 52,
-  },
-  input: {
-    flex: 1,
-    ...typography.body,
-    color: colors.textPrimary,
-    paddingVertical: spacing.md,
-    // Keep the caret and text on the correct side in RTL locales.
-    textAlign: I18nManager.isRTL ? 'right' : 'left',
-    writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr',
-  },
-  toggle: { paddingStart: spacing.sm },
-  messageRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-    marginTop: spacing.xs + 2,
-  },
-  error: { ...typography.caption, color: colors.danger, flex: 1 },
-  hint: {
-    ...typography.caption,
-    color: colors.textTertiary,
-    marginTop: spacing.xs + 2,
-  },
-});
+const makeStyles = (c: AppColors) =>
+  StyleSheet.create({
+    wrapper: { marginBottom: spacing.lg },
+    label: {
+      ...typography.caption,
+      color: c.textSecondary,
+      marginBottom: spacing.xs + 2,
+      fontWeight: '600',
+    },
+    field: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: c.surface,
+      borderRadius: radius.md,
+      paddingHorizontal: spacing.lg,
+      minHeight: 52,
+    },
+    input: {
+      flex: 1,
+      ...typography.body,
+      color: c.textPrimary,
+      paddingVertical: spacing.md,
+      // Keep the caret and text on the correct side in RTL locales.
+      textAlign: I18nManager.isRTL ? 'right' : 'left',
+      writingDirection: I18nManager.isRTL ? 'rtl' : 'ltr',
+    },
+    toggle: { paddingStart: spacing.sm },
+    messageRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs,
+      marginTop: spacing.xs + 2,
+    },
+    error: { ...typography.caption, color: c.danger, flex: 1 },
+    hint: {
+      ...typography.caption,
+      color: c.textTertiary,
+      marginTop: spacing.xs + 2,
+    },
+  });

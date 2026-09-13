@@ -13,12 +13,13 @@ import {
   promptBiometric,
 } from '../../services/biometricService';
 import { clearPin } from '../../services/secureStore';
-import { colors, spacing, typography } from '../../theme';
+import { AppColors, spacing, typography, useThemedStyles } from '../../theme';
 import type { SettingsStackScreenProps } from '../../navigation/types';
 
 export default function SecurityScreen({
   navigation,
 }: SettingsStackScreenProps<'Security'>) {
+  const styles = useThemedStyles(makeStyles);
   const { t } = usePreferences();
   const { security, updateSecurity } = useAuth();
 
@@ -140,13 +141,14 @@ export default function SecurityScreen({
   );
 }
 
-const styles = StyleSheet.create({
-  content: { paddingHorizontal: spacing.xl, paddingTop: spacing.lg },
-  subtitle: {
-    ...typography.body,
-    color: colors.textSecondary,
-    marginBottom: spacing.xl,
-  },
-  bannerWrap: { marginBottom: spacing.lg },
-  spacer: { height: spacing.lg },
-});
+const makeStyles = (c: AppColors) =>
+  StyleSheet.create({
+    content: { paddingHorizontal: spacing.xl, paddingTop: spacing.lg },
+    subtitle: {
+      ...typography.body,
+      color: c.textSecondary,
+      marginBottom: spacing.xl,
+    },
+    bannerWrap: { marginBottom: spacing.lg },
+    spacer: { height: spacing.lg },
+  });

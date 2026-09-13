@@ -7,13 +7,22 @@ require Pod::Executable.execute_command('node', ['-p',
 
 require_relative '../node_modules/react-native-permissions/scripts/setup'
 
-platform :ios, min_ios_version_supported
+# GoogleMLKit/FaceDetection 9.0.0 (used by the attendance face detector) requires
+# iOS 15.5, above React Native 0.87's own 15.1 floor.
+$ZaltrixMinIOS = '15.5'
+platform :ios, [min_ios_version_supported, $ZaltrixMinIOS].max
+
+# Lets react-native-fast-tflite build its CoreML delegate, which is what makes
+# face embedding fast enough to feel instant on iPhone.
+$EnableCoreMLDelegate = true
 prepare_react_native_project!
 
 # react-native-permissions: only compile the permission handlers we actually use.
 permissions_path = File.join(__dir__, '..', 'node_modules', 'react-native-permissions', 'ios')
 setup_permissions([
+  'Camera',
   'Notifications',
+  'PhotoLibrary',
 ])
 
 linkage = ENV['USE_FRAMEWORKS']
@@ -24,6 +33,9 @@ end
 
 target 'Zaltrix' do
   config = use_native_modules!
+
+  # Face detection backed by Apple's Vision framework, replacing ML Kit on iOS.
+  pod 'ZXFaceDetector', :path => './ZXFaceDetector'
 
   use_react_native!(
     :path => config[:reactNativePath],
@@ -38,5 +50,30 @@ target 'Zaltrix' do
       :mac_catalyst_enabled => false,
       # :ccache_enabled => true
     )
+
+    # Pods default to React Native's floor; raise any that sit below ours.
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |cfg|
+        current = cfg.build_settings['IPHONEOS_DEPLOYMENT_TARGET']
+        if current.nil? || Gem::Version.new(current) < Gem::Version.new($ZaltrixMinIOS)
+          cfg.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = $ZaltrixMinIOS
+        end
+        # GoogleMLKit ships arm64 for devices and x86_64 for the Simulator — it
+        # has no arm64-Simulator slice. CocoaPods cannot merge this setting
+        # automatically because TensorFlowLiteC asks to exclude i386 instead, so
+        # it silently drops both and the Simulator link fails on an arm64 Mac.
+        # Forcing it here makes Simulator builds x86_64 (Rosetta).
+        cfg.build_settings['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64 i386'
+      end
+    end
+
+    # Same setting on the generated app xcconfigs, for the same reason.
+    installer.aggregate_targets.each do |aggregate|
+      aggregate.xcconfigs.each do |config_name, config_file|
+        config_file.attributes['EXCLUDED_ARCHS[sdk=iphonesimulator*]'] = 'arm64 i386'
+        path = aggregate.xcconfig_path(config_name)
+        config_file.save_as(path)
+      end
+    end
   end
 end

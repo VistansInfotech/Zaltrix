@@ -3,19 +3,21 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import { usePreferences } from '../context/PreferencesContext';
 import SettingsScreen from '../screens/main/SettingsScreen';
+import AppearanceScreen from '../screens/settings/AppearanceScreen';
 import ChangePinScreen from '../screens/settings/ChangePinScreen';
 import LanguageScreen from '../screens/settings/LanguageScreen';
 import NotificationsScreen from '../screens/settings/NotificationsScreen';
 import ProfileScreen from '../screens/settings/ProfileScreen';
 import SecurityScreen from '../screens/settings/SecurityScreen';
 import TermsScreen from '../screens/settings/TermsScreen';
-import { colors, typography } from '../theme';
+import { typography, useColors } from '../theme';
 import type { SettingsStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<SettingsStackParamList>();
 
 export default function SettingsStack() {
   const { t } = usePreferences();
+  const colors = useColors();
 
   return (
     <Stack.Navigator
@@ -44,6 +46,11 @@ export default function SettingsStack() {
         name="Language"
         component={LanguageScreen}
         options={{ title: t('language.title') }}
+      />
+      <Stack.Screen
+        name="Appearance"
+        component={AppearanceScreen}
+        options={{ title: t('appearance.title') }}
       />
       <Stack.Screen
         name="Notifications"

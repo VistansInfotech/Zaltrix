@@ -2,8 +2,7 @@ import {
   isValidEmail,
   isWeakPin,
   passwordStrength,
-  STRENGTH_KEYS,
-} from '../src/utils/validation';
+  STRENGTH_KEYS, isValidPhone } from '../src/utils/validation';
 
 describe('isValidEmail', () => {
   it.each(['a@b.co', 'vivek.shukla@zaltrix.app', 'user+tag@sub.domain.com'])(
@@ -56,4 +55,32 @@ describe('isWeakPin', () => {
   it.each(['1837', '9042', '5182'])('accepts non-obvious PIN %s', pin =>
     expect(isWeakPin(pin)).toBe(false),
   );
+});
+
+describe('isValidPhone', () => {
+  it.each([
+    '+91 98765 43210',
+    '9876543210',
+    '+1 (555) 010-9999',
+    '020 7946 0018',
+    '+44-20-7946-0018',
+  ])('accepts %s', value => {
+    expect(isValidPhone(value)).toBe(true);
+  });
+
+  it.each([
+    ['', 'empty'],
+    ['   ', 'whitespace'],
+    ['123456', 'too few digits'],
+    ['1234567890123456', 'too many digits'],
+    ['call me maybe', 'letters'],
+    ['+91 98765 4321x', 'trailing letter'],
+    ['98765#43210', 'stray symbol'],
+  ])('rejects %j (%s)', value => {
+    expect(isValidPhone(value)).toBe(false);
+  });
+
+  it('ignores surrounding whitespace', () => {
+    expect(isValidPhone('  9876543210  ')).toBe(true);
+  });
 });

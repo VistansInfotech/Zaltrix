@@ -8,7 +8,7 @@ import Screen from '../../components/Screen';
 import TextField, { TextFieldHandle } from '../../components/TextField';
 import { useAuth } from '../../context/AuthContext';
 import { usePreferences } from '../../context/PreferencesContext';
-import { colors, spacing, typography } from '../../theme';
+import { AppColors, spacing, typography, useThemedStyles } from '../../theme';
 import { isValidEmail } from '../../utils/validation';
 import type { AuthStackScreenProps } from '../../navigation/types';
 import AuthHeader from './AuthHeader';
@@ -16,6 +16,7 @@ import AuthHeader from './AuthHeader';
 type Errors = Partial<Record<'email' | 'password', string>>;
 
 export default function LoginScreen({ navigation }: AuthStackScreenProps<'Login'>) {
+  const styles = useThemedStyles(makeStyles);
   const { t } = usePreferences();
   const { login } = useAuth();
 
@@ -123,22 +124,23 @@ export default function LoginScreen({ navigation }: AuthStackScreenProps<'Login'
   );
 }
 
-const styles = StyleSheet.create({
-  content: { paddingHorizontal: spacing.xl },
-  logoRow: { alignItems: 'flex-start', marginBottom: spacing.xl },
-  title: { ...typography.display, color: colors.textPrimary },
-  subtitle: {
-    ...typography.body,
-    color: colors.textSecondary,
-    marginTop: spacing.xs,
-    marginBottom: spacing.xl,
-  },
-  bannerWrap: { marginBottom: spacing.lg },
-  footer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: spacing.lg,
-  },
-  footerText: { ...typography.body, color: colors.textSecondary },
-});
+const makeStyles = (c: AppColors) =>
+  StyleSheet.create({
+    content: { paddingHorizontal: spacing.xl },
+    logoRow: { alignItems: 'flex-start', marginBottom: spacing.xl },
+    title: { ...typography.display, color: c.textPrimary },
+    subtitle: {
+      ...typography.body,
+      color: c.textSecondary,
+      marginTop: spacing.xs,
+      marginBottom: spacing.xl,
+    },
+    bannerWrap: { marginBottom: spacing.lg },
+    footer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: spacing.lg,
+    },
+    footerText: { ...typography.body, color: c.textSecondary },
+  });

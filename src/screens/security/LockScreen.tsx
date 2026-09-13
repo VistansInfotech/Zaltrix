@@ -16,11 +16,12 @@ import {
   promptBiometric,
 } from '../../services/biometricService';
 import { verifyPin } from '../../services/secureStore';
-import { colors, spacing, typography } from '../../theme';
+import { AppColors, spacing, typography, useThemedStyles } from '../../theme';
 
 const MAX_ATTEMPTS = 5;
 
 export default function LockScreen() {
+  const styles = useThemedStyles(makeStyles);
   const { t } = usePreferences();
   const { security, unlock, logout, user } = useAuth();
   const insets = useSafeAreaInsets();
@@ -118,8 +119,9 @@ export default function LockScreen() {
   return (
     <Screen contentStyle={styles.content}>
       <View style={styles.header}>
-        <Logo variant="stacked" width={132} />
-        <Text style={styles.title}>{t('lock.title')}</Text>
+        {/* The logo says whose app this is; a line of text repeating the app
+            name under it said nothing the lock screen did not already show. */}
+        <Logo variant="stacked" width={168} />
         <Text style={styles.subtitle}>
           {user?.email ?? t('lock.subtitle')}
         </Text>
@@ -185,26 +187,22 @@ export default function LockScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  content: { paddingHorizontal: spacing.xl },
-  header: {
-    alignItems: 'center',
-    paddingTop: spacing.xxxl,
-    gap: spacing.xs,
-  },
-  title: {
-    ...typography.title,
-    color: colors.textPrimary,
-    marginTop: spacing.lg,
-  },
-  subtitle: { ...typography.body, color: colors.textSecondary },
-  pinArea: { flex: 1, justifyContent: 'center', gap: spacing.md },
-  errorSlot: { height: 64, justifyContent: 'center' },
-  padWrap: { alignItems: 'center', gap: spacing.xs },
-  logout: { marginTop: spacing.xs },
-  centerActions: {
-    flex: 1,
-    justifyContent: 'flex-end',
-    gap: spacing.sm,
-  },
-});
+const makeStyles = (c: AppColors) =>
+  StyleSheet.create({
+    content: { paddingHorizontal: spacing.xl },
+    header: {
+      alignItems: 'center',
+      paddingTop: spacing.xxxl,
+      gap: spacing.xs,
+    },
+    subtitle: { ...typography.body, color: c.textSecondary },
+    pinArea: { flex: 1, justifyContent: 'center', gap: spacing.md },
+    errorSlot: { height: 64, justifyContent: 'center' },
+    padWrap: { alignItems: 'center', gap: spacing.xs },
+    logout: { marginTop: spacing.xs },
+    centerActions: {
+      flex: 1,
+      justifyContent: 'flex-end',
+      gap: spacing.sm,
+    },
+  });

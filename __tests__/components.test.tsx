@@ -14,11 +14,13 @@ import Icon, { IconName } from '../src/components/Icon';
 import SectionHeader from '../src/components/SectionHeader';
 import SettingsRow from '../src/components/SettingsRow';
 import { PinDots } from '../src/components/PinPad';
+import { ThemeProvider } from '../src/theme';
 
+/** Every component reads the palette from context, so the provider is required. */
 function render(element: React.ReactElement) {
   let tree: ReactTestRenderer.ReactTestRenderer | undefined;
   ReactTestRenderer.act(() => {
-    tree = ReactTestRenderer.create(element);
+    tree = ReactTestRenderer.create(<ThemeProvider>{element}</ThemeProvider>);
   });
   return tree!;
 }
@@ -26,7 +28,7 @@ function render(element: React.ReactElement) {
 const ICON_NAMES: IconName[] = [
   'feed', 'settings', 'chevronRight', 'chevronLeft', 'user', 'globe', 'bell',
   'fileText', 'logOut', 'shield', 'lock', 'faceId', 'fingerprint', 'check',
-  'close', 'eye', 'eyeOff', 'alert', 'backspace', 'info', 'external',
+  'close', 'eye', 'eyeOff', 'alert', 'backspace', 'info', 'contrast', 'external',
 ];
 
 describe('Icon', () => {
@@ -74,6 +76,41 @@ describe('Avatar', () => {
   ])('derives initials of %j as %s', (name, expected) => {
     expect(JSON.stringify(render(<Avatar name={name} />).toJSON())).toContain(
       expected,
+    );
+  });
+
+  const PHOTO = 'data:image/jpeg;base64,AAAA';
+  const images = (tree: ReturnType<typeof render>) =>
+    tree.root.findAll(n => (n.type as unknown) === 'Image');
+
+  it('shows "?" rather than crashing on an empty name', () => {
+    expect(JSON.stringify(render(<Avatar name="   " />).toJSON())).toContain('?');
+  });
+
+  it('renders the picture when one is set, and drops the initials', () => {
+    const tree = render(<Avatar name="Vivek Shukla" uri={PHOTO} />);
+    expect(images(tree)).toHaveLength(1);
+    expect(images(tree)[0].props.source).toEqual({ uri: PHOTO });
+    expect(JSON.stringify(tree.toJSON())).not.toContain('VS');
+  });
+
+  it('ignores a value that is not a renderable image', () => {
+    const tree = render(<Avatar name="Vivek Shukla" uri="https://example.com/a.jpg" />);
+    expect(images(tree)).toHaveLength(0);
+  });
+
+  it('falls back to initials if the stored picture fails to decode', () => {
+    const tree = render(<Avatar name="Vivek Shukla" uri={PHOTO} />);
+    ReactTestRenderer.act(() => {
+      images(tree)[0].props.onError();
+    });
+    expect(images(tree)).toHaveLength(0);
+    expect(JSON.stringify(tree.toJSON())).toContain('VS');
+  });
+
+  it('stays circular at any size', () => {
+    expect(JSON.stringify(render(<Avatar name="A B" size={92} />).toJSON())).toContain(
+      '"borderRadius":46',
     );
   });
 });

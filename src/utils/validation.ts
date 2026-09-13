@@ -5,6 +5,20 @@ export function isValidEmail(value: string): boolean {
   return EMAIL_RE.test(value.trim());
 }
 
+/**
+ * Deliberately permissive: digits, spaces and the usual separators, 7-15 digits.
+ * Phone formats vary enormously by country, so this catches typos and junk
+ * without rejecting a number that is merely unfamiliar.
+ */
+export function isValidPhone(value: string): boolean {
+  const trimmed = value.trim();
+  if (!/^[+]?[\d\s()./-]+$/.test(trimmed)) {
+    return false;
+  }
+  const digits = trimmed.replace(/\D/g, '');
+  return digits.length >= 7 && digits.length <= 15;
+}
+
 export type PasswordStrength = 0 | 1 | 2 | 3;
 
 export function passwordStrength(password: string): PasswordStrength {

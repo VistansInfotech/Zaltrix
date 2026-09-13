@@ -13,7 +13,15 @@ import Icon from '../../components/Icon';
 import Screen from '../../components/Screen';
 import { useAuth } from '../../context/AuthContext';
 import { usePreferences } from '../../context/PreferencesContext';
-import { colors, radius, shadow, spacing, typography } from '../../theme';
+import {
+  AppColors,
+  radius,
+  shadows,
+  spacing,
+  typography,
+  useColors,
+  useThemedStyles,
+} from '../../theme';
 
 type Category = 'updates' | 'alerts';
 
@@ -22,20 +30,23 @@ type FeedItem = {
   key: 'one' | 'two' | 'three' | 'four';
   category: Category;
   minutes: number;
-  accent: string;
+  /** Palette key rather than a literal, so the tag follows the scheme. */
+  accent: keyof AppColors;
 };
 
 const ITEMS: FeedItem[] = [
-  { id: '1', key: 'one', category: 'updates', minutes: 2, accent: colors.primary },
-  { id: '2', key: 'two', category: 'alerts', minutes: 1, accent: colors.success },
-  { id: '3', key: 'three', category: 'updates', minutes: 3, accent: colors.accent },
-  { id: '4', key: 'four', category: 'alerts', minutes: 1, accent: colors.primaryLight },
+  { id: '1', key: 'one', category: 'updates', minutes: 2, accent: 'primary' },
+  { id: '2', key: 'two', category: 'alerts', minutes: 1, accent: 'success' },
+  { id: '3', key: 'three', category: 'updates', minutes: 3, accent: 'accent' },
+  { id: '4', key: 'four', category: 'alerts', minutes: 1, accent: 'primaryLight' },
 ];
 
 const FILTERS = ['all', 'updates', 'alerts'] as const;
 type Filter = (typeof FILTERS)[number];
 
 export default function FeedScreen() {
+  const colors = useColors();
+  const styles = useThemedStyles(makeStyles);
   const { t } = usePreferences();
   const { user } = useAuth();
 
@@ -87,7 +98,7 @@ export default function FeedScreen() {
                 </Text>
                 <Text style={styles.screenTitle}>{t('feed.title')}</Text>
               </View>
-              {user ? <Avatar name={user.name} size={46} /> : null}
+              {user ? <Avatar name={user.name} size={46} uri={user.avatar} /> : null}
             </View>
 
             <View style={styles.filters}>
@@ -142,13 +153,16 @@ function FeedCard({
   item: FeedItem;
   t: (key: string, options?: Record<string, unknown>) => string;
 }) {
+  const colors = useColors();
+  const styles = useThemedStyles(makeStyles);
+  const accent = colors[item.accent];
   return (
     <Pressable
       accessibilityRole="button"
       style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}>
       <View style={styles.cardTop}>
-        <View style={[styles.tag, { backgroundColor: item.accent + '1A' }]}>
-          <Text style={[styles.tagText, { color: item.accent }]}>
+        <View style={[styles.tag, { backgroundColor: accent + '1A' }]}>
+          <Text style={[styles.tagText, { color: accent }]}>
             {t(`feed.items.${item.key}.tag`)}
           </Text>
         </View>
@@ -161,74 +175,75 @@ function FeedCard({
   );
 }
 
-const styles = StyleSheet.create({
-  list: {
-    paddingHorizontal: spacing.xl,
-    paddingBottom: spacing.xxl,
-    gap: spacing.md,
-  },
-  header: { paddingTop: spacing.md, paddingBottom: spacing.xs },
-  greetingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-  },
-  greetingText: { flex: 1, gap: 2 },
-  greeting: { ...typography.body, color: colors.textSecondary },
-  screenTitle: { ...typography.display, color: colors.textPrimary },
-  filters: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    marginTop: spacing.xl,
-    marginBottom: spacing.sm,
-  },
-  chip: {
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    borderRadius: radius.pill,
-    backgroundColor: colors.surfaceAlt,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
-  },
-  chipActive: { backgroundColor: colors.primary, borderColor: colors.primary },
-  chipPressed: { opacity: 0.75 },
-  chipLabel: { ...typography.caption, color: colors.textSecondary, fontWeight: '600' },
-  chipLabelActive: { color: colors.textOnPrimary },
+const makeStyles = (c: AppColors, t: { shadow: (typeof shadows)['light'] }) =>
+  StyleSheet.create({
+    list: {
+      paddingHorizontal: spacing.xl,
+      paddingBottom: spacing.xxl,
+      gap: spacing.md,
+    },
+    header: { paddingTop: spacing.md, paddingBottom: spacing.xs },
+    greetingRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.md,
+    },
+    greetingText: { flex: 1, gap: 2 },
+    greeting: { ...typography.body, color: c.textSecondary },
+    screenTitle: { ...typography.display, color: c.textPrimary },
+    filters: {
+      flexDirection: 'row',
+      gap: spacing.sm,
+      marginTop: spacing.xl,
+      marginBottom: spacing.sm,
+    },
+    chip: {
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.sm,
+      borderRadius: radius.pill,
+      backgroundColor: c.surfaceAlt,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: c.border,
+    },
+    chipActive: { backgroundColor: c.primary, borderColor: c.primary },
+    chipPressed: { opacity: 0.75 },
+    chipLabel: { ...typography.caption, color: c.textSecondary, fontWeight: '600' },
+    chipLabelActive: { color: c.textOnPrimary },
 
-  card: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.lg,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
-    padding: spacing.lg,
-    gap: spacing.sm,
-    ...(shadow.card as object),
-  },
-  cardPressed: { transform: [{ scale: 0.995 }], backgroundColor: colors.surfaceAlt },
-  cardTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  tag: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: 5,
-    borderRadius: radius.pill,
-  },
-  tagText: { ...typography.caption, fontWeight: '700', fontSize: 11 },
-  meta: { ...typography.caption, color: colors.textTertiary },
-  cardTitle: { ...typography.subtitle, color: colors.textPrimary },
-  cardBody: { ...typography.body, color: colors.textSecondary },
+    card: {
+      backgroundColor: c.surface,
+      borderRadius: radius.lg,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: c.border,
+      padding: spacing.lg,
+      gap: spacing.sm,
+      ...(t.shadow.card as object),
+    },
+    cardPressed: { transform: [{ scale: 0.995 }], backgroundColor: c.surfaceAlt },
+    cardTop: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    tag: {
+      paddingHorizontal: spacing.md,
+      paddingVertical: 5,
+      borderRadius: radius.pill,
+    },
+    tagText: { ...typography.caption, fontWeight: '700', fontSize: 11 },
+    meta: { ...typography.caption, color: c.textTertiary },
+    cardTitle: { ...typography.subtitle, color: c.textPrimary },
+    cardBody: { ...typography.body, color: c.textSecondary },
 
-  empty: {
-    alignItems: 'center',
-    gap: spacing.sm,
-    paddingVertical: spacing.xxxl,
-  },
-  emptyTitle: { ...typography.subtitle, color: colors.textPrimary },
-  emptyBody: {
-    ...typography.caption,
-    color: colors.textSecondary,
-    textAlign: 'center',
-  },
-});
+    empty: {
+      alignItems: 'center',
+      gap: spacing.sm,
+      paddingVertical: spacing.xxxl,
+    },
+    emptyTitle: { ...typography.subtitle, color: c.textPrimary },
+    emptyBody: {
+      ...typography.caption,
+      color: c.textSecondary,
+      textAlign: 'center',
+    },
+  });

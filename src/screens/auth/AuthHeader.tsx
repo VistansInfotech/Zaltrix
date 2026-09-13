@@ -2,10 +2,12 @@ import React from 'react';
 import { I18nManager, Pressable, StyleSheet, View } from 'react-native';
 
 import Icon from '../../components/Icon';
-import { colors, radius, spacing } from '../../theme';
+import { AppColors, radius, spacing, useColors, useThemedStyles } from '../../theme';
 
 /** Back affordance for the auth stack, mirrored automatically in RTL. */
 export default function AuthHeader({ onBack }: { onBack: () => void }) {
+  const colors = useColors();
+  const styles = useThemedStyles(makeStyles);
   return (
     <View style={styles.header}>
       <Pressable
@@ -23,20 +25,21 @@ export default function AuthHeader({ onBack }: { onBack: () => void }) {
   );
 }
 
-const styles = StyleSheet.create({
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: spacing.sm,
-    marginBottom: spacing.sm,
-  },
-  button: {
-    width: 40,
-    height: 40,
-    borderRadius: radius.sm,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginStart: -spacing.sm,
-  },
-  pressed: { backgroundColor: colors.surfaceAlt },
-});
+const makeStyles = (c: AppColors) =>
+  StyleSheet.create({
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: spacing.sm,
+      marginBottom: spacing.sm,
+    },
+    button: {
+      width: 40,
+      height: 40,
+      borderRadius: radius.sm,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginStart: -spacing.sm,
+    },
+    pressed: { backgroundColor: c.surfaceAlt },
+  });

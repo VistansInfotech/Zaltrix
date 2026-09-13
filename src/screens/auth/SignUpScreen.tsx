@@ -1,6 +1,7 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import type { UserRole } from '../../types';
 import Banner from '../../components/Banner';
 import Button from '../../components/Button';
 import Logo from '../../components/Logo';
@@ -8,7 +9,7 @@ import Screen from '../../components/Screen';
 import TextField, { TextFieldHandle } from '../../components/TextField';
 import { useAuth } from '../../context/AuthContext';
 import { usePreferences } from '../../context/PreferencesContext';
-import { colors, radius, spacing, typography } from '../../theme';
+import { AppColors, radius, spacing, typography, useColors, useThemedStyles } from '../../theme';
 import {
   isValidEmail,
   passwordStrength,
@@ -20,6 +21,8 @@ import AuthHeader from './AuthHeader';
 type Errors = Partial<Record<'name' | 'email' | 'password' | 'confirm', string>>;
 
 export default function SignUpScreen({ navigation }: AuthStackScreenProps<'SignUp'>) {
+  const colors = useColors();
+  const styles = useThemedStyles(makeStyles);
   const { t } = usePreferences();
   const { signUp } = useAuth();
 
@@ -30,6 +33,9 @@ export default function SignUpScreen({ navigation }: AuthStackScreenProps<'SignU
   const [errors, setErrors] = useState<Errors>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  // Fixed once the account exists, so it defaults to the lesser privilege:
+  // an admin picked by accident is a permission nobody intended to grant.
+  const [role, setRole] = useState<UserRole>('user');
 
   const emailRef = useRef<TextFieldHandle>(null);
   const passwordRef = useRef<TextFieldHandle>(null);
@@ -73,7 +79,7 @@ export default function SignUpScreen({ navigation }: AuthStackScreenProps<'SignU
     }
 
     setSubmitting(true);
-    const result = await signUp(name, email, password);
+    const result = await signUp(name, email, password, role);
     setSubmitting(false);
 
     if (!result.ok) {
@@ -153,7 +159,7 @@ export default function SignUpScreen({ navigation }: AuthStackScreenProps<'SignU
                 key={i}
                 style={[
                   styles.strengthBar,
-                  i < strength && { backgroundColor: STRENGTH_COLORS[strength] },
+                  i < strength && { backgroundColor: strengthColors(colors)[strength] },
                 ]}
               />
             ))}
@@ -182,6 +188,39 @@ export default function SignUpScreen({ navigation }: AuthStackScreenProps<'SignU
         onSubmitEditing={onSubmit}
       />
 
+      <Text style={styles.roleHeading}>{t('auth.accountType')}</Text>
+      <View style={styles.roleRow}>
+        {(['user', 'admin'] as const).map(option => {
+          const selected = role === option;
+          return (
+            <Pressable
+              key={option}
+              onPress={() => setRole(option)}
+              accessibilityRole="radio"
+              accessibilityState={{ selected }}
+              accessibilityLabel={t(
+                option === 'admin' ? 'auth.roleAdmin' : 'auth.roleUser',
+              )}
+              accessibilityHint={t(
+                option === 'admin' ? 'auth.roleAdminHint' : 'auth.roleUserHint',
+              )}
+              style={({ pressed }) => [
+                styles.roleCard,
+                selected && styles.roleCardSelected,
+                pressed && styles.rolePressed,
+              ]}>
+              <Text
+                style={[styles.roleLabel, selected && styles.roleLabelSelected]}>
+                {t(option === 'admin' ? 'auth.roleAdmin' : 'auth.roleUser')}
+              </Text>
+              <Text style={styles.roleHint}>
+                {t(option === 'admin' ? 'auth.roleAdminHint' : 'auth.roleUserHint')}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+
       <Button
         label={t('auth.signUp')}
         onPress={onSubmit}
@@ -204,46 +243,67 @@ export default function SignUpScreen({ navigation }: AuthStackScreenProps<'SignU
   );
 }
 
-const STRENGTH_COLORS = [
-  colors.danger,
-  colors.warning,
-  colors.accent,
-  colors.success,
-];
+/** Weakest to strongest; indexed by the computed strength score. */
+const strengthColors = (c: AppColors) => [c.danger, c.warning, c.accent, c.success];
 
-const styles = StyleSheet.create({
-  content: { paddingHorizontal: spacing.xl },
-  logoRow: { alignItems: 'flex-start', marginBottom: spacing.xl },
-  title: { ...typography.display, color: colors.textPrimary },
-  subtitle: {
-    ...typography.body,
-    color: colors.textSecondary,
-    marginTop: spacing.xs,
-    marginBottom: spacing.xl,
-  },
-  bannerWrap: { marginBottom: spacing.lg },
-  strength: { marginTop: -spacing.sm, marginBottom: spacing.lg, gap: spacing.xs },
-  strengthBars: { flexDirection: 'row', gap: spacing.xs },
-  strengthBar: {
-    flex: 1,
-    height: 4,
-    borderRadius: radius.pill,
-    backgroundColor: colors.border,
-  },
-  strengthLabel: { ...typography.caption, color: colors.textTertiary },
-  submit: { marginTop: spacing.sm },
-  terms: {
-    ...typography.caption,
-    color: colors.textTertiary,
-    textAlign: 'center',
-    marginTop: spacing.lg,
-    paddingHorizontal: spacing.md,
-  },
-  footer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: spacing.lg,
-  },
-  footerText: { ...typography.body, color: colors.textSecondary },
-});
+const makeStyles = (c: AppColors) =>
+  StyleSheet.create({
+    content: { paddingHorizontal: spacing.xl },
+    logoRow: { alignItems: 'flex-start', marginBottom: spacing.xl },
+    title: { ...typography.display, color: c.textPrimary },
+    subtitle: {
+      ...typography.body,
+      color: c.textSecondary,
+      marginTop: spacing.xs,
+      marginBottom: spacing.xl,
+    },
+    bannerWrap: { marginBottom: spacing.lg },
+    strength: { marginTop: -spacing.sm, marginBottom: spacing.lg, gap: spacing.xs },
+    strengthBars: { flexDirection: 'row', gap: spacing.xs },
+    strengthBar: {
+      flex: 1,
+      height: 4,
+      borderRadius: radius.pill,
+      backgroundColor: c.border,
+    },
+    strengthLabel: { ...typography.caption, color: c.textTertiary },
+    roleHeading: {
+      ...typography.caption,
+      color: c.textSecondary,
+      fontWeight: '700',
+      textTransform: 'uppercase',
+      letterSpacing: 0.8,
+      marginTop: spacing.md,
+      marginBottom: spacing.sm,
+    },
+    roleRow: { flexDirection: 'row', gap: spacing.sm },
+    roleCard: {
+      flex: 1,
+      padding: spacing.md,
+      borderRadius: radius.md,
+      borderWidth: 1.5,
+      borderColor: c.border,
+      backgroundColor: c.surface,
+      gap: 2,
+    },
+    roleCardSelected: { borderColor: c.primary, backgroundColor: c.primarySoft },
+    rolePressed: { opacity: 0.7 },
+    roleLabel: { ...typography.bodyStrong, color: c.textPrimary },
+    roleLabelSelected: { color: c.primary },
+    roleHint: { ...typography.caption, color: c.textSecondary, fontSize: 11 },
+    submit: { marginTop: spacing.sm },
+    terms: {
+      ...typography.caption,
+      color: c.textTertiary,
+      textAlign: 'center',
+      marginTop: spacing.lg,
+      paddingHorizontal: spacing.md,
+    },
+    footer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: spacing.lg,
+    },
+    footerText: { ...typography.body, color: c.textSecondary },
+  });

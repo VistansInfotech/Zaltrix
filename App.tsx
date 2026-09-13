@@ -11,16 +11,27 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider } from './src/context/AuthContext';
 import { PreferencesProvider } from './src/context/PreferencesContext';
 import RootNavigator from './src/navigation/RootNavigator';
+import { ThemeProvider, useTheme } from './src/theme';
+
+/** Lives inside ThemeProvider so the bar follows the active scheme. */
+function ThemedStatusBar() {
+  const { isDark } = useTheme();
+  // RN 0.87 dropped StatusBar's `backgroundColor`; on Android the bar colour
+  // comes from the native theme instead (see values-night/styles.xml).
+  return <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} />;
+}
 
 export default function App() {
   return (
     <SafeAreaProvider>
-      <StatusBar barStyle="dark-content" />
-      <PreferencesProvider>
-        <AuthProvider>
-          <RootNavigator />
-        </AuthProvider>
-      </PreferencesProvider>
+      <ThemeProvider>
+        <ThemedStatusBar />
+        <PreferencesProvider>
+          <AuthProvider>
+            <RootNavigator />
+          </AuthProvider>
+        </PreferencesProvider>
+      </ThemeProvider>
     </SafeAreaProvider>
   );
 }

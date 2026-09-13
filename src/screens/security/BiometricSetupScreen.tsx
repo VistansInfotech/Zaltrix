@@ -12,12 +12,22 @@ import {
   getBiometricCapability,
   promptBiometric,
 } from '../../services/biometricService';
-import { colors, radius, shadow, spacing, typography } from '../../theme';
+import {
+  AppColors,
+  radius,
+  shadows,
+  spacing,
+  typography,
+  useColors,
+  useThemedStyles,
+} from '../../theme';
 import type { SecurityStackScreenProps } from '../../navigation/types';
 
 export default function BiometricSetupScreen({
   navigation,
 }: SecurityStackScreenProps<'BiometricSetup'>) {
+  const colors = useColors();
+  const styles = useThemedStyles(makeStyles);
   const { t } = usePreferences();
   const { completeSecuritySetup } = useAuth();
 
@@ -130,6 +140,8 @@ function OptionCard({
   loading?: boolean;
   recommended?: boolean;
 }) {
+  const colors = useColors();
+  const styles = useThemedStyles(makeStyles);
   return (
     <Pressable
       onPress={onPress}
@@ -165,54 +177,55 @@ function OptionCard({
   );
 }
 
-const styles = StyleSheet.create({
-  content: { paddingHorizontal: spacing.xl },
-  header: {
-    alignItems: 'center',
-    paddingTop: spacing.xxxl,
-    gap: spacing.sm,
-  },
-  shieldChip: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
-    backgroundColor: colors.primarySoft,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing.sm,
-  },
-  title: { ...typography.display, color: colors.textPrimary, textAlign: 'center' },
-  subtitle: {
-    ...typography.body,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    paddingHorizontal: spacing.sm,
-  },
-  options: { flex: 1, justifyContent: 'center', gap: spacing.md },
-  card: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.lg,
-    padding: spacing.lg,
-    borderRadius: radius.lg,
-    borderWidth: 1.5,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    ...(shadow.card as object),
-  },
-  cardRecommended: { borderColor: colors.primary },
-  cardPressed: { transform: [{ scale: 0.99 }], backgroundColor: colors.primarySoft },
-  cardDisabled: { opacity: 0.5 },
-  cardIcon: {
-    width: 52,
-    height: 52,
-    borderRadius: radius.md,
-    backgroundColor: colors.primarySoft,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cardText: { flex: 1, gap: 3 },
-  cardTitle: { ...typography.subtitle, color: colors.textPrimary },
-  cardDescription: { ...typography.caption, color: colors.textSecondary },
-  footer: { alignItems: 'center' },
-});
+const makeStyles = (c: AppColors, t: { shadow: (typeof shadows)['light'] }) =>
+  StyleSheet.create({
+    content: { paddingHorizontal: spacing.xl },
+    header: {
+      alignItems: 'center',
+      paddingTop: spacing.xxxl,
+      gap: spacing.sm,
+    },
+    shieldChip: {
+      width: 68,
+      height: 68,
+      borderRadius: 34,
+      backgroundColor: c.primarySoft,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginBottom: spacing.sm,
+    },
+    title: { ...typography.display, color: c.textPrimary, textAlign: 'center' },
+    subtitle: {
+      ...typography.body,
+      color: c.textSecondary,
+      textAlign: 'center',
+      paddingHorizontal: spacing.sm,
+    },
+    options: { flex: 1, justifyContent: 'center', gap: spacing.md },
+    card: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.lg,
+      padding: spacing.lg,
+      borderRadius: radius.lg,
+      borderWidth: 1.5,
+      borderColor: c.border,
+      backgroundColor: c.surface,
+      ...(t.shadow.card as object),
+    },
+    cardRecommended: { borderColor: c.primary },
+    cardPressed: { transform: [{ scale: 0.99 }], backgroundColor: c.primarySoft },
+    cardDisabled: { opacity: 0.5 },
+    cardIcon: {
+      width: 52,
+      height: 52,
+      borderRadius: radius.md,
+      backgroundColor: c.primarySoft,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    cardText: { flex: 1, gap: 3 },
+    cardTitle: { ...typography.subtitle, color: c.textPrimary },
+    cardDescription: { ...typography.caption, color: c.textSecondary },
+    footer: { alignItems: 'center' },
+  });

@@ -5,4 +5,6 @@
     <color name="brand_primary_dark">#4A1270</color>
     <color name="brand_accent">#C9A227</color>
     <color name="splash_background">#6A1B9A</color>
+    <!-- First-frame window background; see values-night for the dark variant. -->
+    <color name="window_background">#FFFFFF</color>
 </resources>

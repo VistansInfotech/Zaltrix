@@ -4,9 +4,12 @@ export const StorageKeys = {
   user: '@zaltrix/user',
   session: '@zaltrix/session',
   language: '@zaltrix/language',
+  theme: '@zaltrix/theme',
   securityConfig: '@zaltrix/security',
   notificationPrefs: '@zaltrix/notification-prefs',
   onboarded: '@zaltrix/onboarded',
+  enrolledFaces: '@zaltrix/enrolled-faces',
+  attendanceLog: '@zaltrix/attendance-log',
 } as const;
 
 export async function readJSON<T>(key: string, fallback: T): Promise<T> {

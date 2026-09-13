@@ -1,6 +1,16 @@
 import { Platform, TextStyle } from 'react-native';
 
-export { colors, palette } from './colors';
+export { colors, darkColors, lightColors, palette, schemes } from './colors';
+export type { AppColors, ColorScheme } from './colors';
+export { shadow, shadows } from './elevation';
+export {
+  ThemeProvider,
+  THEME_PREFERENCES,
+  useColors,
+  useTheme,
+  useThemedStyles,
+} from './ThemeContext';
+export type { ThemePreference } from './ThemeContext';
 
 export const spacing = {
   xs: 4,
@@ -87,26 +97,3 @@ export const typography: Record<string, TextStyle> = {
     letterSpacing: 0.2,
   },
 };
-
-export const shadow = {
-  card: Platform.select({
-    ios: {
-      shadowColor: '#3A0E58',
-      shadowOpacity: 0.08,
-      shadowRadius: 16,
-      shadowOffset: { width: 0, height: 6 },
-    },
-    android: { elevation: 3 },
-    default: {},
-  }),
-  floating: Platform.select({
-    ios: {
-      shadowColor: '#3A0E58',
-      shadowOpacity: 0.18,
-      shadowRadius: 24,
-      shadowOffset: { width: 0, height: 10 },
-    },
-    android: { elevation: 8 },
-    default: {},
-  }),
-} as const;

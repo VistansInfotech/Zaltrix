@@ -8,7 +8,14 @@ import {
   View,
 } from 'react-native';
 
-import { colors, radius, spacing, typography } from '../theme';
+import {
+  AppColors,
+  radius,
+  spacing,
+  typography,
+  useColors,
+  useThemedStyles,
+} from '../theme';
 import Icon, { IconName } from './Icon';
 
 export const PIN_LENGTH = 4;
@@ -24,6 +31,7 @@ export function PinDots({
   error?: boolean;
   length?: number;
 }) {
+  const styles = useThemedStyles(makeStyles);
   const shake = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -91,6 +99,8 @@ export default function PinPad({
   deleteLabel,
   disabled = false,
 }: Props) {
+  const styles = useThemedStyles(makeStyles);
+
   return (
     <View style={styles.pad}>
       {ROWS.map(row => (
@@ -143,6 +153,9 @@ function Key({
   subtle?: boolean;
   accessibilityLabel?: string;
 }) {
+  const colors = useColors();
+  const styles = useThemedStyles(makeStyles);
+
   return (
     <Pressable
       onPress={onPress}
@@ -164,45 +177,46 @@ function Key({
   );
 }
 
-const styles = StyleSheet.create({
-  dots: {
-    flexDirection: 'row',
-    gap: spacing.lg,
-    alignSelf: 'center',
-  },
-  dot: {
-    width: 15,
-    height: 15,
-    borderRadius: 8,
-    borderWidth: 1.6,
-    borderColor: colors.borderStrong,
-    backgroundColor: 'transparent',
-  },
-  dotFilled: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  dotError: { borderColor: colors.danger, backgroundColor: colors.danger },
+const makeStyles = (c: AppColors) =>
+  StyleSheet.create({
+    dots: {
+      flexDirection: 'row',
+      gap: spacing.lg,
+      alignSelf: 'center',
+    },
+    dot: {
+      width: 15,
+      height: 15,
+      borderRadius: 8,
+      borderWidth: 1.6,
+      borderColor: c.borderStrong,
+      backgroundColor: 'transparent',
+    },
+    dotFilled: {
+      backgroundColor: c.primary,
+      borderColor: c.primary,
+    },
+    dotError: { borderColor: c.danger, backgroundColor: c.danger },
 
-  pad: { gap: spacing.md, alignSelf: 'center' },
-  row: { flexDirection: 'row', gap: spacing.lg, justifyContent: 'center' },
-  key: {
-    width: 74,
-    height: 62,
-    borderRadius: radius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  keySolid: {
-    backgroundColor: colors.surfaceAlt,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: colors.border,
-  },
-  keyPressed: { backgroundColor: colors.primarySoft, transform: [{ scale: 0.97 }] },
-  keyDisabled: { opacity: 0.4 },
-  keyLabel: {
-    ...typography.title,
-    color: colors.textPrimary,
-    fontWeight: '600',
-  },
-});
+    pad: { gap: spacing.md, alignSelf: 'center' },
+    row: { flexDirection: 'row', gap: spacing.lg, justifyContent: 'center' },
+    key: {
+      width: 74,
+      height: 62,
+      borderRadius: radius.md,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    keySolid: {
+      backgroundColor: c.surfaceAlt,
+      borderWidth: StyleSheet.hairlineWidth,
+      borderColor: c.border,
+    },
+    keyPressed: { backgroundColor: c.primarySoft, transform: [{ scale: 0.97 }] },
+    keyDisabled: { opacity: 0.4 },
+    keyLabel: {
+      ...typography.title,
+      color: c.textPrimary,
+      fontWeight: '600',
+    },
+  });

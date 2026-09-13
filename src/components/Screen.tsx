@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { Edge, SafeAreaView } from 'react-native-safe-area-context';
 
-import { colors, spacing } from '../theme';
+import { spacing, useColors } from '../theme';
 
 type Props = {
   children: React.ReactNode;
@@ -29,10 +29,13 @@ export default function Screen({
   scroll = false,
   avoidKeyboard = false,
   edges = ['top', 'left', 'right'],
-  background = colors.background,
+  background,
   style,
   contentStyle,
 }: Props) {
+  const colors = useColors();
+  const bg = background ?? colors.background;
+
   const inner = scroll ? (
     <ScrollView
       style={styles.flex}
@@ -48,7 +51,7 @@ export default function Screen({
   return (
     <SafeAreaView
       edges={edges}
-      style={[styles.flex, { backgroundColor: background }, style]}>
+      style={[styles.flex, { backgroundColor: bg }, style]}>
       {avoidKeyboard ? (
         <KeyboardAvoidingView
           style={styles.flex}

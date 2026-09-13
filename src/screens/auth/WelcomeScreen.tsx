@@ -6,20 +6,21 @@ import Button from '../../components/Button';
 import Logo from '../../components/Logo';
 import Screen from '../../components/Screen';
 import { usePreferences } from '../../context/PreferencesContext';
-import { colors, spacing, typography } from '../../theme';
+import { AppColors, spacing, typography, useThemedStyles } from '../../theme';
 import type { AuthStackScreenProps } from '../../navigation/types';
 
 export default function WelcomeScreen({
   navigation,
 }: AuthStackScreenProps<'Welcome'>) {
   const { t } = usePreferences();
+  const styles = useThemedStyles(makeStyles);
   const insets = useSafeAreaInsets();
 
   return (
     <Screen contentStyle={styles.content}>
       <View style={styles.hero}>
-        {/* The stacked artwork already carries the "Premium Software" lockup. */}
-        <Logo variant="stacked" width={210} />
+        <Logo variant="stacked" width={248} />
+        <Text style={styles.tagline}>{t('welcome.tagline')}</Text>
       </View>
 
       <View style={styles.copy}>
@@ -42,25 +43,33 @@ export default function WelcomeScreen({
   );
 }
 
-const styles = StyleSheet.create({
-  content: { paddingHorizontal: spacing.xl },
-  hero: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
-  },
-  copy: { gap: spacing.md, marginBottom: spacing.xxl },
-  headline: {
-    ...typography.display,
-    color: colors.textPrimary,
-    textAlign: 'center',
-  },
-  body: {
-    ...typography.body,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    paddingHorizontal: spacing.md,
-  },
-  actions: { gap: spacing.sm },
-});
+const makeStyles = (c: AppColors) =>
+  StyleSheet.create({
+    content: { paddingHorizontal: spacing.xl },
+    hero: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: spacing.md,
+    },
+    tagline: {
+      ...typography.overline,
+      color: c.accentStrong,
+      textAlign: 'center',
+      letterSpacing: 1.6,
+      fontSize: 10.5,
+    },
+    copy: { gap: spacing.md, marginBottom: spacing.xxl },
+    headline: {
+      ...typography.display,
+      color: c.textPrimary,
+      textAlign: 'center',
+    },
+    body: {
+      ...typography.body,
+      color: c.textSecondary,
+      textAlign: 'center',
+      paddingHorizontal: spacing.md,
+    },
+    actions: { gap: spacing.sm },
+  });
