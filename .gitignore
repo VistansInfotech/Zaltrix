@@ -1,0 +1,74 @@
+# OSX
+.DS_Store
+*.swp
+*~
+
+# Xcode / iOS
+ios/build/
+ios/Pods/
+ios/*.xcworkspace/xcuserdata/
+ios/*.xcodeproj/xcuserdata/
+ios/*.xcodeproj/project.xcworkspace/xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+project.xcworkspace
+DerivedData/
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# CocoaPods (keep Podfile.lock committed for reproducible builds)
+ios/.xcode.env.local
+
+# Android / IntelliJ / Gradle
+android/build/
+android/app/build/
+android/.gradle/
+android/.cxx/
+android/app/.cxx/
+android/local.properties
+android/app/release/
+android/captures/
+*.keystore
+!debug.keystore
+*.jks
+*.iml
+.idea/
+.gradle/
+*.hprof
+
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+*.log
+
+# Metro
+.metro-health-check*
+metro-cache/
+
+# Ruby / Bundler (fastlane, CocoaPods)
+vendor/
+.bundle/
+
+# Fastlane
+**/fastlane/report.xml
+**/fastlane/Preview.html
+**/fastlane/screenshots
+**/fastlane/test_output
+
+# Testing / coverage
+coverage/
+
+# Env & secrets
+.env
+.env.*
+!.env.example
+google-services.json
+GoogleService-Info.plist
+
+# Editors / misc
+.vscode/
+.watchman-cookie-*
+*.tsbuildinfo

@@ -1,0 +1,11 @@
+{
+  "extends": "@react-native/typescript-config",
+  "compilerOptions": {
+    // "node" is needed only by the tests, which compare our SHA-256 against
+    // node's crypto module; app code never imports it.
+    "types": ["jest", "node"],
+    "resolveJsonModule": true
+  },
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["**/node_modules", "**/Pods"]
+}
