@@ -14,7 +14,8 @@
     "enable": "Activar",
     "notNow": "Ahora no",
     "required": "Este campo es obligatorio",
-    "clear": "Borrar"
+    "clear": "Borrar",
+    "close": "Cerrar"
   },
   "welcome": {
     "tagline": "Automate. Elevate. Dominate.",
@@ -53,7 +54,12 @@
       "passwordWeak": "Usa letras y números para una contraseña más fuerte",
       "confirmMismatch": "Las contraseñas no coinciden",
       "accountExists": "Ya existe una cuenta con este correo",
-      "invalidCredentials": "Correo o contraseña incorrectos"
+      "invalidCredentials": "Correo o contraseña incorrectos",
+      "dobRequired": "Elige tu fecha de nacimiento",
+      "dobFuture": "La fecha de nacimiento no puede estar en el futuro",
+      "dobTooYoung": "Debes tener al menos {{years}} años",
+      "dobImplausible": "Revisa el año",
+      "genderRequired": "Elige una opción"
     },
     "passwordStrength": {
       "label": "Seguridad de la contraseña",
@@ -66,7 +72,19 @@
     "roleAdmin": "Administrador",
     "roleUser": "Usuario",
     "roleAdminHint": "Registra rostros y ve los registros de todos",
-    "roleUserHint": "Solo marca su propia asistencia"
+    "roleUserHint": "Solo marca su propia asistencia",
+    "dateOfBirth": "Fecha de nacimiento",
+    "dateOfBirthPlaceholder": "Elige tu fecha de nacimiento",
+    "dateOfBirthHint": "Se usa en tu perfil. Nunca se muestra a otras personas.",
+    "gender": "Género",
+    "genderFemale": "Mujer",
+    "genderMale": "Hombre",
+    "genderOther": "Otro",
+    "genderUndisclosed": "Prefiero no decirlo",
+    "genderPlaceholder": "Selecciona tu género",
+    "roleHr": "RR. HH.",
+    "roleHrHint": "El mismo acceso que un administrador, con el cargo de RR. HH.",
+    "accountTypePlaceholder": "Elige un tipo de cuenta"
   },
   "biometric": {
     "title": "Protege tu cuenta",
@@ -111,7 +129,7 @@
     "feed": "Novedades",
     "settings": "Ajustes",
     "attendance": "Bio Attendance",
-    "action": "Marcar"
+    "action": "Espacio"
   },
   "feed": {
     "title": "Novedades",
@@ -300,7 +318,59 @@
     "actionLead": "Mira a la cámara y tu fichaje se registra automáticamente.",
     "actionLast": "Último fichaje en este dispositivo",
     "actionNone": "Hoy no hay nada registrado en este dispositivo.",
-    "actionAdminOnly": "El registro de rostros y los registros de todos están disponibles en una cuenta de administrador."
+    "actionAdminOnly": "El registro de rostros y los registros de todos están disponibles en una cuenta de administrador.",
+    "location": {
+      "title": "Ubicación y perímetro",
+      "subtitle": "Registra dónde ocurre cada fichaje y, si quieres, rechaza los fichajes hechos fuera del lugar de trabajo.",
+      "adminAction": "Ubicación y perímetro",
+      "sectionRecording": "Registro",
+      "captureLabel": "Registrar dónde ocurre cada fichaje",
+      "captureHint": "La latitud, la longitud y la dirección más cercana se guardan con cada entrada y salida.",
+      "sectionFence": "Comprobación de radio",
+      "enforceLabel": "Aceptar solo fichajes dentro del radio",
+      "enforceHint": "Un fichaje hecho fuera del área se rechaza y no se registra nada.",
+      "enforceNeedsCapture": "Activa primero el registro.",
+      "enforceNeedsCentre": "Fija primero un centro.",
+      "centreTitle": "Centro del lugar de trabajo",
+      "centreNone": "Aún no hay centro fijado",
+      "useCurrent": "Fijar mi ubicación actual",
+      "pinning": "Obteniendo la ubicación…",
+      "repin": "Volver a fijar donde estoy ahora",
+      "radiusTitle": "Radio permitido",
+      "labelField": "Nombre del lugar",
+      "labelPlaceholder": "p. ej. Oficina central",
+      "updatedAt": "Último cambio {{date}}",
+      "yourPosition": "Dónde estás ahora",
+      "checking": "Comprobando…",
+      "distanceFromCentre": "a {{distance}} del centro",
+      "insideNow": "Estás dentro del área permitida",
+      "outsideNow": "Estás fuera del área permitida",
+      "atLabel": "En",
+      "none": "Ubicación no registrada",
+      "accuracy": "±{{meters}}",
+      "refusedTitle": "Fuera del lugar de trabajo",
+      "refusedBody": "Estás a {{distance}} de {{place}}. Solo se aceptan fichajes dentro de {{radius}}.",
+      "refusedBodyUnnamed": "Estás a {{distance}}. Solo se aceptan fichajes dentro de {{radius}} del lugar de trabajo.",
+      "thisPlace": "el lugar de trabajo",
+      "userStatusOff": "Los fichajes no llevan ubicación.",
+      "userStatusCapture": "Cada fichaje registra dónde estás.",
+      "userStatusEnforced": "Debes estar a menos de {{radius}} de {{place}} para fichar.",
+      "privacyNote": "Las coordenadas se quedan en este dispositivo. Solo las coordenadas se envían a un servicio de mapas para convertirlas en una dirección; nunca tu nombre, tu ID ni tu cara.",
+      "error": {
+        "permission": "Se necesita acceso a la ubicación para marcar asistencia. Permítelo e inténtalo de nuevo.",
+        "blocked": "El acceso a la ubicación está desactivado para Zaltrix. Actívalo en los ajustes del sistema.",
+        "unavailable": "La ubicación no está disponible en este dispositivo.",
+        "timeout": "No se pudo obtener la ubicación. Ve a un sitio más despejado e inténtalo de nuevo.",
+        "failed": "No se pudo leer tu ubicación. Inténtalo de nuevo."
+      },
+      "openSettings": "Abrir ajustes",
+      "summaryOff": "Desactivado: los fichajes no llevan ubicación",
+      "summaryCapture": "Con ubicación · sin comprobar el radio",
+      "summaryEnforced": "Con ubicación · dentro de {{radius}} de {{place}}",
+      "allow": "Permitir ubicación",
+      "permissionWhy": "Tus fichajes se registran con el lugar donde ocurren, así que Zaltrix necesita acceso a la ubicación."
+    },
+    "punchDate": "{{date}} a las {{time}}"
   },
   "settings": {
     "title": "Ajustes",
@@ -361,7 +431,11 @@
     "notSet": "Sin definir",
     "edit": "Editar",
     "photoHint": "Toca la foto para cambiarla",
-    "memberSinceLabel": "Miembro desde"
+    "memberSinceLabel": "Miembro desde",
+    "dateOfBirth": "Fecha de nacimiento",
+    "gender": "Género",
+    "age": "{{count}} años",
+    "role": "Tipo de cuenta"
   },
   "language": {
     "title": "Idioma",
@@ -443,5 +517,109 @@
     "s8Title": "8. Contacto",
     "s8Body": "Puedes enviar tus preguntas sobre estos Términos a legal@zaltrix.app. Leemos todos los mensajes y respondemos en un plazo de cinco días laborables.",
     "accept": "Entendido"
+  },
+  "workspace": {
+    "title": "Espacio de trabajo",
+    "subtitle": "Tu asistencia, tu nómina y tus viajes en un solo sitio.",
+    "sectionAttendance": "Asistencia",
+    "sectionSalary": "Nómina",
+    "sectionBookings": "Reservas",
+    "seeAll": "Ver todo",
+    "staticNote": "En esta versión, la nómina y las reservas son datos de ejemplo.",
+    "salary": {
+      "title": "Nómina",
+      "lead": "Una nómina por mes. Toca un mes para ver el desglose completo.",
+      "net": "Neto",
+      "gross": "Bruto",
+      "deductions": "Deducciones",
+      "earnings": "Percepciones",
+      "paidOn": "Pagado el {{date}}",
+      "empty": "Aún no hay nóminas.",
+      "thisMonth": "Este mes",
+      "status": {
+        "paid": "PAGADA",
+        "pending": "PENDIENTE",
+        "processing": "EN PROCESO"
+      },
+      "component": {
+        "basic": "Salario base",
+        "hra": "Ayuda de vivienda",
+        "allowance": "Otros complementos",
+        "providentFund": "Fondo de previsión",
+        "tax": "IRPF"
+      },
+      "payslipTitle": "Nómina",
+      "gateTitle": "Confirma que eres tú",
+      "gateLead": "Tus nóminas muestran lo que cobras, así que se pide la contraseña de tu cuenta antes de mostrarlas.",
+      "gateLocked": "Contraseña necesaria"
+    },
+    "bookings": {
+      "title": "Reservas",
+      "lead": "Vuelos, hoteles, coches y trenes reservados para ti.",
+      "empty": "Aún no hay reservas.",
+      "reference": "Ref. {{reference}}",
+      "nights": "{{count}} noches",
+      "oneNight": "1 noche",
+      "upcoming": "Próximas",
+      "type": {
+        "flight": "Vuelo",
+        "hotel": "Hotel",
+        "car": "Coche",
+        "train": "Tren",
+        "bus": "Autobús"
+      },
+      "status": {
+        "new": "NUEVA",
+        "confirmed": "CONFIRMADA",
+        "completed": "COMPLETADA",
+        "cancelled": "CANCELADA"
+      },
+      "chooseType": "Qué se reservó",
+      "typeCount": "{{count}} reservadas",
+      "typeNone": "Aún ninguna",
+      "typeTitle": "Reservas de {{type}}",
+      "summaryCount": "{{count}} reservas",
+      "summaryNext": "Próximo viaje · {{date}}",
+      "summaryNone": "Nada próximo",
+      "nextShort": "Próx. {{date}}",
+      "lastShort": "Último {{date}}",
+      "latest": "Recientes",
+      "openType": "Abre todas las reservas de {{type}}"
+    },
+    "salaryCard": "{{month}} · ••••••",
+    "salaryCardEmpty": "Aún no hay nóminas",
+    "bookingsCard": "{{count}} reservadas · próxima {{next}}",
+    "bookingsCardNone": "{{count}} reservadas",
+    "bookingsCardEmpty": "Nada reservado",
+    "openHint": "Abre la lista completa",
+    "sectionMine": "Lo tuyo",
+    "newBooking": {
+      "title": "Nueva reserva",
+      "add": "Añadir",
+      "chooseType": "¿Qué vas a reservar?",
+      "details": "Detalles",
+      "when": "Cuándo",
+      "titleLabel": "Ruta o lugar",
+      "titlePlaceholderTravel": "p. ej. Delhi → Bengaluru",
+      "titlePlaceholderStay": "p. ej. Taj MG Road, Bengaluru",
+      "referenceLabel": "Referencia o localizador",
+      "referencePlaceholder": "p. ej. AI-2841",
+      "amountLabel": "Importe",
+      "amountPlaceholder": "0",
+      "startLabel": "Empieza",
+      "startPlaceholder": "Elige una fecha",
+      "endLabel": "Termina",
+      "endPlaceholder": "Elige una fecha",
+      "endOptional": "Déjalo vacío para un trayecto de ida o un traslado.",
+      "submit": "Añadir reserva",
+      "saving": "Guardando…",
+      "added": "{{title}} añadida. Aparece como NUEVA hasta que se emita.",
+      "errorType": "Elige qué vas a reservar.",
+      "errorTitle": "Escribe una ruta o un lugar.",
+      "errorReference": "Escribe la referencia o el localizador.",
+      "errorAmount": "Escribe un importe.",
+      "errorStart": "Elige cuándo empieza.",
+      "errorEndBefore": "El final no puede ser anterior al inicio."
+    }
   }
 }

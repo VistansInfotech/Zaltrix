@@ -8,8 +8,8 @@ import { usePreferences } from '../context/PreferencesContext';
 import FeedScreen from '../screens/main/FeedScreen';
 import { AppColors, typography, useColors, useThemedStyles } from '../theme';
 import { useAuth } from '../context/AuthContext';
-import { roleOf } from '../types';
-import ActionStack from './ActionStack';
+import { canManageAttendance, roleOf } from '../types';
+import WorkspaceStack from './WorkspaceStack';
 import AttendanceStack from './AttendanceStack';
 import SettingsStack from './SettingsStack';
 import type { MainTabParamList } from './types';
@@ -35,9 +35,9 @@ function tabBarVisibility<T extends keyof MainTabParamList>(
 export default function MainTabs() {
   const { t } = usePreferences();
   const { user } = useAuth();
-  // Absent or unknown role means the ordinary one; the admin tab is granted,
-  // never assumed.
-  const isAdmin = roleOf(user) === 'admin';
+  // Absent or unknown role means the ordinary one; the attendance tab is
+  // granted, never assumed. Admin and HR both manage attendance.
+  const canManage = canManageAttendance(roleOf(user));
   const colors = useColors();
   const styles = useThemedStyles(makeStyles);
 
@@ -69,28 +69,28 @@ export default function MainTabs() {
       />
       {/* Everyone can mark a punch. */}
       <Tab.Screen
-        name="ActionTab"
-        component={ActionStack}
+        name="WorkspaceTab"
+        component={WorkspaceStack}
         options={({ route }) => ({
           title: t('tabs.action'),
           tabBarIcon: ({ color, focused }) => (
             <Icon
-              name="check"
+              name="checkCircle"
               size={23}
               color={color}
-              strokeWidth={focused ? 2.6 : 2.1}
+              strokeWidth={focused ? 2.4 : 1.9}
             />
           ),
-          tabBarStyle: tabBarVisibility(route, 'ActionHome')
+          tabBarStyle: tabBarVisibility(route, 'WorkspaceHome')
             ? styles.tabBar
             : styles.tabBarHidden,
         })}
       />
 
-      {/* Admin only. Rendering nothing rather than a disabled tab: the screens
-          are not registered at all, so there is no route for a deep link or a
-          stray navigate() to reach. */}
-      {isAdmin ? (
+      {/* Admin and HR only. Rendering nothing rather than a disabled tab: the
+          screens are not registered at all, so there is no route for a deep
+          link or a stray navigate() to reach. */}
+      {canManage ? (
       <Tab.Screen
         name="AttendanceTab"
         component={AttendanceStack}

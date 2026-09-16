@@ -20,12 +20,27 @@ import {
 import Icon from '../../components/Icon';
 import { usePreferences } from '../../context/PreferencesContext';
 import {
+  attachAddress,
   AttendanceRecord,
   EnrolledPerson,
   listCandidates,
   logAttendance,
 } from '../../services/attendanceStore';
 import { playCue, releaseCues } from '../../services/attendanceFeedback';
+import {
+  evaluateGeofence,
+  hasCentre,
+  readGeofence,
+  type GeofenceConfig,
+} from '../../services/geofenceStore';
+import {
+  describeLocation,
+  formatDistance,
+  getCurrentLocation,
+  LocationError,
+  reverseGeocode,
+  type PunchLocation,
+} from '../../services/locationService';
 import type { DetectedFace } from '../../services/faceDetector';
 import { findBestMatch, getFaceModel } from '../../services/faceRecognition';
 import { AppColors, radius, spacing, typography, useThemedStyles } from '../../theme';
@@ -42,7 +57,17 @@ const STABLE_FRAMES = 4;
 /** How long a result stays up, and how long before the next auto-scan. */
 const RESULT_MS = 2800;
 
-type Phase = 'idle' | 'ready' | 'scanning' | 'success' | 'error';
+type Phase = 'idle' | 'ready' | 'locating' | 'scanning' | 'success' | 'error';
+
+/**
+ * A refused punch, as opposed to a failed one.
+ *
+ * Kept apart from the generic error message because the two want different
+ * words: a failure says "try again", a refusal has to say where you are, where
+ * you need to be, and how far apart those are — otherwise the person just
+ * scans again, from the same spot, and gets the same nothing.
+ */
+type Refusal = { title: string; body: string };
 
 export default function MarkAttendanceScreen({
   navigation,
@@ -55,7 +80,15 @@ export default function MarkAttendanceScreen({
   const [phase, setPhase] = useState<Phase>('idle');
   const [record, setRecord] = useState<AttendanceRecord | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [refusal, setRefusal] = useState<Refusal | null>(null);
   const [modelReady, setModelReady] = useState(false);
+
+  /**
+   * Read once on mount and held in a ref, not state: the scan reads it from
+   * inside a callback pinned by the face detector, where a stale closure over
+   * a state value would enforce yesterday's settings.
+   */
+  const fence = useRef<GeofenceConfig | null>(null);
 
   const device = useCameraDevice('front');
   const { hasPermission, requestPermission } = useCameraPermission();
@@ -96,10 +129,16 @@ export default function MarkAttendanceScreen({
     };
   }, [t]);
 
+  useEffect(() => {
+    void readGeofence().then(config => {
+      fence.current = config;
+    });
+  }, []);
+
   useEffect(() => () => void releaseCues(), []);
 
   useEffect(() => {
-    if (phase === 'scanning') {
+    if (phase === 'scanning' || phase === 'locating') {
       const loop = Animated.loop(
         Animated.sequence([
           Animated.timing(pulse, {
@@ -144,6 +183,7 @@ export default function MarkAttendanceScreen({
     scanning.current = true;
     setPhase('scanning');
     setMessage(null);
+    setRefusal(null);
 
     try {
       const { embedding: probe } = await capture(photoOutput);
@@ -155,14 +195,28 @@ export default function MarkAttendanceScreen({
         setPhase('error');
         void playCue('error');
       } else {
+        // The face is matched first and the position taken second, so a person
+        // standing outside the fence is told that they are outside it — not
+        // that they were not recognised.
+        const place = await resolvePlace();
+        if (place.refused) {
+          setRefusal(place.refused);
+          setPhase('error');
+          void playCue('error');
+          return;
+        }
+
         const saved = await logAttendance({
           personId: match.item.id,
           name: match.item.name,
           score: match.score,
+          location: place.location,
+          distanceMeters: place.distance,
         });
         setRecord(saved);
         setPhase('success');
         void playCue('success');
+        nameThePlace(saved);
       }
     } catch (e) {
       const reason = e instanceof FaceCaptureError ? e.reason : 'failed';
@@ -178,9 +232,108 @@ export default function MarkAttendanceScreen({
           setPhase('idle');
           setRecord(null);
           setMessage(null);
+          setRefusal(null);
         }
       }, RESULT_MS);
     }
+  }
+
+  /**
+   * The position to stamp on this punch, and whether it is allowed at all.
+   *
+   * Three outcomes, and the difference between the last two is the whole
+   * point of the two switches:
+   *
+   *  - location off        → no fix taken, punch recorded bare.
+   *  - capture only, no fix → punch still recorded. A dead GPS is not grounds
+   *                           for refusing someone their day's attendance when
+   *                           nobody asked for the position to be checked.
+   *  - enforcing, no fix    → refused. Here the fix *is* the check, and letting
+   *                           an unreadable position through would make
+   *                           "turn off location services" the way around it.
+   */
+  async function resolvePlace(): Promise<{
+    location: PunchLocation | null;
+    distance: number | null;
+    refused?: Refusal;
+  }> {
+    const config = fence.current;
+    if (!config?.captureLocation) {
+      return { location: null, distance: null };
+    }
+
+    const enforcing = config.enforceRadius && hasCentre(config);
+    setPhase('locating');
+
+    let location: PunchLocation;
+    try {
+      // Coordinates only. The address is looked up after the punch is saved —
+      // see nameThePlace — because it needs the network and the punch does not.
+      location = await getCurrentLocation();
+    } catch (e) {
+      if (!enforcing) {
+        return { location: null, distance: null };
+      }
+      const reason = e instanceof LocationError ? e.reason : 'failed';
+      return {
+        location: null,
+        distance: null,
+        refused: {
+          title: t('attendance.location.refusedTitle'),
+          body: t(`attendance.location.error.${reason}`),
+        },
+      };
+    }
+
+    const verdict = evaluateGeofence(config, location);
+    const distance = verdict.state === 'off' ? null : verdict.distance;
+
+    if (verdict.state === 'outside') {
+      const radius = formatDistance(config.radiusMeters);
+      const away = formatDistance(verdict.distance);
+      const place = config.label ?? config.address;
+      return {
+        location,
+        distance,
+        refused: {
+          title: t('attendance.location.refusedTitle'),
+          body: place
+            ? t('attendance.location.refusedBody', { distance: away, place, radius })
+            : t('attendance.location.refusedBodyUnnamed', {
+                distance: away,
+                radius,
+              }),
+        },
+      };
+    }
+
+    return { location, distance };
+  }
+
+  /**
+   * Resolves the saved punch's address in the background and writes it back.
+   *
+   * Deliberately not awaited: the punch is already recorded and the person is
+   * already walking away. If the card is still up when the name arrives it
+   * updates in place; if the lookup fails, the record keeps its coordinates
+   * and nobody is any the worse off.
+   */
+  function nameThePlace(saved: AttendanceRecord) {
+    const fix = saved.location;
+    if (!fix) {
+      return;
+    }
+    void (async () => {
+      const address = await reverseGeocode(fix.latitude, fix.longitude);
+      if (!address) {
+        return;
+      }
+      const updated = await attachAddress(saved.recordId, address);
+      // Only touches the card if it is still showing this same punch.
+      setRecord(current =>
+        updated && current?.recordId === updated.recordId ? updated : current,
+      );
+    })();
   }
 
   runScanRef.current = runScan;
@@ -231,12 +384,14 @@ export default function MarkAttendanceScreen({
       ? '#4ADE80'
       : phase === 'error'
       ? '#FF7A7A'
-      : phase === 'ready' || phase === 'scanning'
+      : phase === 'ready' || phase === 'scanning' || phase === 'locating'
       ? '#E0C55F'
       : 'rgba(255,255,255,0.55)';
 
   const hint =
-    phase === 'scanning'
+    phase === 'locating'
+      ? t('attendance.location.checking')
+      : phase === 'scanning'
       ? t('attendance.scanning')
       : phase === 'ready'
       ? t('attendance.holdStill')
@@ -272,7 +427,7 @@ export default function MarkAttendanceScreen({
           style={[
             styles.ring,
             { borderColor: ringColour },
-            phase === 'scanning' && {
+            (phase === 'scanning' || phase === 'locating') && {
               transform: [
                 { scale: pulse.interpolate({ inputRange: [0, 1], outputRange: [1, 1.06] }) },
               ],
@@ -302,20 +457,56 @@ export default function MarkAttendanceScreen({
               {record.name}
             </Text>
             <Text style={styles.resultMeta}>
-              {t('attendance.idLabel')} {record.personId} ·{' '}
-              {new Date(record.at).toLocaleTimeString(language, {
-                hour: '2-digit',
-                minute: '2-digit',
+              {t('attendance.idLabel')} {record.personId}
+            </Text>
+            <Text style={styles.resultMeta}>
+              {t('attendance.punchDate', {
+                date: new Date(record.at).toLocaleDateString(language, {
+                  weekday: 'short',
+                  day: 'numeric',
+                  month: 'short',
+                  year: 'numeric',
+                }),
+                time: new Date(record.at).toLocaleTimeString(language, {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                }),
               })}
             </Text>
+            {record.location ? (
+              <View style={styles.resultPlace}>
+                <Icon name="mapPin" size={14} color="rgba(255,255,255,0.72)" strokeWidth={2} />
+                <Text style={styles.resultPlaceText} numberOfLines={2}>
+                  {describeLocation(record.location)}
+                </Text>
+              </View>
+            ) : null}
             <Text style={styles.resultScore}>
               {t('attendance.confidence', { percent: Math.round(record.score * 100) })}
+              {record.distanceMeters !== null &&
+              record.distanceMeters !== undefined
+                ? ` · ${t('attendance.location.distanceFromCentre', {
+                    distance: formatDistance(record.distanceMeters),
+                  })}`
+                : ''}
             </Text>
           </Animated.View>
         </View>
       ) : null}
 
-      {phase === 'error' && message ? (
+      {phase === 'error' && refusal ? (
+        <View pointerEvents="none" style={styles.resultLayer}>
+          <Animated.View style={[styles.resultCard, { transform: [{ scale: resultScale }] }]}>
+            <View style={[styles.resultBadge, styles.resultBadgeBad]}>
+              <Icon name="mapPin" size={38} color="#FFFFFF" strokeWidth={2.4} />
+            </View>
+            <Text style={styles.errorTitle}>{refusal.title}</Text>
+            <Text style={styles.resultMeta}>{refusal.body}</Text>
+          </Animated.View>
+        </View>
+      ) : null}
+
+      {phase === 'error' && message && !refusal ? (
         <View pointerEvents="none" style={styles.resultLayer}>
           <Animated.View style={[styles.resultCard, { transform: [{ scale: resultScale }] }]}>
             <View style={[styles.resultBadge, styles.resultBadgeBad]}>
@@ -341,7 +532,9 @@ export default function MarkAttendanceScreen({
       </View>
 
       <View style={[styles.bottomBar, { paddingBottom: insets.bottom + spacing.xl }]}>
-        {phase === 'scanning' ? <ActivityIndicator color="#FFFFFF" /> : null}
+        {phase === 'scanning' || phase === 'locating' ? (
+          <ActivityIndicator color="#FFFFFF" />
+        ) : null}
         <Text style={styles.hint}>{hint}</Text>
       </View>
     </View>
@@ -425,10 +618,25 @@ const makeStyles = (_c: AppColors) =>
       color: 'rgba(255,255,255,0.72)',
       textAlign: 'center',
     },
+    resultPlace: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      justifyContent: 'center',
+      gap: 6,
+      marginTop: spacing.xs,
+      paddingHorizontal: spacing.md,
+    },
+    resultPlaceText: {
+      ...typography.caption,
+      color: 'rgba(255,255,255,0.72)',
+      flexShrink: 1,
+      textAlign: 'center',
+    },
     resultScore: {
       ...typography.caption,
       color: 'rgba(255,255,255,0.45)',
       marginTop: spacing.xs,
+      textAlign: 'center',
     },
 
     topBar: {

@@ -17,6 +17,7 @@ import {
   formatDuration,
   groupPersonDays,
 } from '../../services/attendanceSummary';
+import { describeLocation } from '../../services/locationService';
 import {
   AppColors,
   radius,
@@ -247,6 +248,20 @@ function DayCard({
         })
       : undefined;
 
+  /**
+   * The place under a punch, indented to hang off its dot.
+   *
+   * Only rendered when there is one: a blank "location not recorded" line
+   * against every punch from before the feature existed would bury the times
+   * that the screen is actually for.
+   */
+  const place = (record?: AttendanceRecord) =>
+    record?.location ? (
+      <Text style={styles.punchPlace} numberOfLines={2}>
+        {describeLocation(record.location)}
+      </Text>
+    ) : null;
+
   return (
     <View style={styles.day}>
       <View style={styles.dayHeader}>
@@ -274,6 +289,7 @@ function DayCard({
                     : t('attendance.punchMissing')}
                 </Text>
               </View>
+              {place(pair.punchIn)}
 
               <View style={styles.punch}>
                 <View style={[styles.dot, styles.dotOut]} />
@@ -283,6 +299,7 @@ function DayCard({
                     : t('attendance.punchMissing')}
                 </Text>
               </View>
+              {place(pair.punchOut)}
 
               {pair.durationMs !== undefined ? (
                 <Text style={styles.shiftDuration}>
@@ -369,6 +386,15 @@ const makeStyles = (c: AppColors) =>
     dotOut: { backgroundColor: c.accentStrong },
     punchText: { ...typography.body, color: c.textPrimary },
     punchMissing: { color: c.textTertiary, fontStyle: 'italic' },
+    /** Indented past the dot and its gap, so it reads as belonging to it. */
+    punchPlace: {
+      ...typography.caption,
+      color: c.textTertiary,
+      fontSize: 11,
+      lineHeight: 15,
+      marginLeft: spacing.sm + 8,
+      marginTop: -1,
+    },
     shiftDuration: {
       ...typography.caption,
       color: c.textSecondary,

@@ -7,6 +7,7 @@
  */
 import { readJSON, StorageKeys, writeJSON } from './storage';
 import { Candidate, FaceEmbedding } from './faceRecognition';
+import type { PunchLocation } from './locationService';
 
 export type EnrolledPerson = {
   /** The identifier the operator typed, e.g. a staff or roll number. */
@@ -36,6 +37,18 @@ export type AttendanceRecord = {
   /** Cosine similarity of the match, kept for auditing borderline scans. */
   score: number;
   kind: PunchKind;
+  /**
+   * Where the punch was made. Absent on records written before location was
+   * switched on, and on any punch where the fix could not be taken — so every
+   * reader has to handle its absence rather than assume a coordinate.
+   */
+  location?: PunchLocation | null;
+  /**
+   * Metres from the configured centre at the moment of the punch, when there
+   * was a centre to measure against. Frozen into the record on purpose: moving
+   * the office boundary later must not silently rewrite what already happened.
+   */
+  distanceMeters?: number | null;
 };
 
 function newId(): string {
@@ -136,6 +149,8 @@ export async function logAttendance(entry: {
   personId: string;
   name: string;
   score: number;
+  location?: PunchLocation | null;
+  distanceMeters?: number | null;
 }): Promise<AttendanceRecord> {
   const log = await listAttendance();
   const record: AttendanceRecord = {
@@ -146,9 +161,43 @@ export async function logAttendance(entry: {
     score: entry.score,
     // The log is newest-first, so nextPunchKind reads the latest scan directly.
     kind: nextPunchKind(log, entry.personId),
+    location: entry.location ?? null,
+    distanceMeters: entry.distanceMeters ?? null,
   };
   await writeJSON(StorageKeys.attendanceLog, [record, ...log]);
   return record;
+}
+
+/**
+ * Fills in the address on a punch that was already recorded.
+ *
+ * The address needs the network; the punch does not. Making a person stand at
+ * the door while a geocoder is asked what the door is called would put seconds
+ * onto every punch in a 9am queue, so the record is written with its
+ * coordinates straight away and named afterwards, if and when that succeeds.
+ *
+ * A no-op when the record has gone or never had a position — both are ordinary
+ * outcomes of a lookup that finished after the log was cleared.
+ */
+export async function attachAddress(
+  recordId: string,
+  address: string | null,
+): Promise<AttendanceRecord | undefined> {
+  if (!address) {
+    return undefined;
+  }
+  const log = await listAttendance();
+  const index = log.findIndex(r => r.recordId === recordId);
+  if (index < 0 || !log[index].location) {
+    return undefined;
+  }
+  const updated: AttendanceRecord = {
+    ...log[index],
+    location: { ...log[index].location!, address },
+  };
+  log[index] = updated;
+  await writeJSON(StorageKeys.attendanceLog, log);
+  return updated;
 }
 
 export async function clearAttendance(): Promise<void> {

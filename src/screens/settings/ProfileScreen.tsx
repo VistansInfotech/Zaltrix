@@ -23,6 +23,7 @@ import {
   useColors,
   useThemedStyles,
 } from '../../theme';
+import { ageFrom, fromDateKey, roleOf } from '../../types';
 import { formatMonthYear } from '../../utils/format';
 import { isValidPhone } from '../../utils/validation';
 import type { SettingsStackScreenProps } from '../../navigation/types';
@@ -50,6 +51,27 @@ export default function ProfileScreen({
 
   const memberSince = user ? formatMonthYear(new Date(user.createdAt), language) : '';
   const notSet = t('profile.notSet');
+
+  // Both are set once at sign-up and shown read-only here, so the answers a
+  // person gave are visible to them rather than only to storage.
+  const born = fromDateKey(user?.dateOfBirth);
+  const dateOfBirth = born
+    ? `${born.toLocaleDateString(language, {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      })} · ${t('profile.age', { count: ageFrom(born) })}`
+    : null;
+  const gender = user?.gender
+    ? t(
+        `auth.gender${user.gender.charAt(0).toUpperCase()}${user.gender.slice(1)}`,
+      )
+    : null;
+
+  // HR and admin are the same permissions under two titles, so the title is
+  // the only place the distinction is visible at all.
+  const ROLE_LABELS = { user: 'auth.roleUser', hr: 'auth.roleHr', admin: 'auth.roleAdmin' };
+  const roleLabel = t(ROLE_LABELS[roleOf(user)]);
 
   /* --------------------------------- editing -------------------------------- */
 
@@ -217,6 +239,13 @@ export default function ProfileScreen({
             value={user?.position}
             fallback={notSet}
           />
+          <DetailRow
+            label={t('profile.dateOfBirth')}
+            value={dateOfBirth}
+            fallback={notSet}
+          />
+          <DetailRow label={t('profile.gender')} value={gender} fallback={notSet} />
+          <DetailRow label={t('profile.role')} value={roleLabel} />
           <DetailRow label={t('profile.userId')} value={user?.id} mono />
           <DetailRow label={t('profile.memberSinceLabel')} value={memberSince} last />
         </Card>

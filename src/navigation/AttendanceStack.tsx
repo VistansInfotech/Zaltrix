@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import { usePreferences } from '../context/PreferencesContext';
 import AttendanceHomeScreen from '../screens/attendance/AttendanceHomeScreen';
+import GeofenceScreen from '../screens/attendance/GeofenceScreen';
 import MarkAttendanceScreen from '../screens/attendance/MarkAttendanceScreen';
 import PersonAttendanceScreen from '../screens/attendance/PersonAttendanceScreen';
 import RegisteredUsersScreen from '../screens/attendance/RegisteredUsersScreen';
@@ -96,6 +97,11 @@ export default function AttendanceStack() {
         name="PersonAttendance"
         component={PersonAttendanceScreen}
         options={{ title: t('attendance.historyTitle') }}
+      />
+      <Stack.Screen
+        name="Geofence"
+        component={GeofenceScreen}
+        options={{ title: t('attendance.location.title') }}
       />
       <Stack.Screen
         name="MarkAttendance"

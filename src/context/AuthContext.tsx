@@ -16,6 +16,7 @@ import {
   AppStatus,
   AuthError,
   DEFAULT_SECURITY,
+  Gender,
   SecurityConfig,
   UnlockMethod,
   User,
@@ -23,18 +24,30 @@ import {
 } from '../types';
 import { DEFAULT_ROLE } from '../types';
 
+/**
+ * Everything the sign-up form collects.
+ *
+ * An object rather than a growing list of positional arguments: the form now
+ * gathers six things, and `signUp(name, email, password, role, dob, gender)`
+ * is a call nobody can read and a pair of adjacent strings anyone can swap.
+ */
+export type SignUpDetails = {
+  name: string;
+  email: string;
+  password: string;
+  role?: UserRole;
+  /** `YYYY-MM-DD`, or null when not given. */
+  dateOfBirth?: string | null;
+  gender?: Gender | null;
+};
+
 type Result = { ok: true } | { ok: false; error: AuthError };
 
 type AuthValue = {
   status: AppStatus;
   user: User | null;
   security: SecurityConfig;
-  signUp: (
-    name: string,
-    email: string,
-    password: string,
-    role?: UserRole,
-  ) => Promise<Result>;
+  signUp: (details: SignUpDetails) => Promise<Result>;
   login: (email: string, password: string) => Promise<Result>;
   logout: () => Promise<void>;
   /** Marks security setup complete and moves the app to the dashboard. */
@@ -138,12 +151,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   /* -------------------------------- auth -------------------------------- */
 
   const signUp = useCallback(
-    async (
-      name: string,
-      email: string,
-      password: string,
-      role: UserRole = DEFAULT_ROLE,
-    ): Promise<Result> => {
+    async ({
+      name,
+      email,
+      password,
+      role = DEFAULT_ROLE,
+      dateOfBirth = null,
+      gender = null,
+    }: SignUpDetails): Promise<Result> => {
       const normalised = email.trim().toLowerCase();
       const existing = await secure.hasStoredAccount();
 
@@ -164,6 +179,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         email: normalised,
         createdAt: new Date().toISOString(),
         role,
+        dateOfBirth,
+        gender,
       };
 
       await Promise.all([

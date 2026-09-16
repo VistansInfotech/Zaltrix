@@ -14,7 +14,8 @@
     "enable": "تفعيل",
     "notNow": "ليس الآن",
     "required": "هذا الحقل مطلوب",
-    "clear": "مسح"
+    "clear": "مسح",
+    "close": "إغلاق"
   },
   "welcome": {
     "tagline": "Automate. Elevate. Dominate.",
@@ -53,7 +54,12 @@
       "passwordWeak": "استخدم حروفًا وأرقامًا للحصول على كلمة مرور أقوى",
       "confirmMismatch": "كلمتا المرور غير متطابقتين",
       "accountExists": "يوجد حساب بهذا البريد الإلكتروني بالفعل",
-      "invalidCredentials": "البريد الإلكتروني أو كلمة المرور غير صحيحة"
+      "invalidCredentials": "البريد الإلكتروني أو كلمة المرور غير صحيحة",
+      "dobRequired": "اختر تاريخ ميلادك",
+      "dobFuture": "لا يمكن أن يكون تاريخ الميلاد في المستقبل",
+      "dobTooYoung": "يجب أن لا يقل عمرك عن {{years}} عاماً",
+      "dobImplausible": "يُرجى التحقق من السنة",
+      "genderRequired": "اختر أحد الخيارات"
     },
     "passwordStrength": {
       "label": "قوة كلمة المرور",
@@ -66,7 +72,19 @@
     "roleAdmin": "مسؤول",
     "roleUser": "مستخدم",
     "roleAdminHint": "يسجّل الوجوه ويرى سجلات الجميع",
-    "roleUserHint": "يسجّل حضوره فقط"
+    "roleUserHint": "يسجّل حضوره فقط",
+    "dateOfBirth": "تاريخ الميلاد",
+    "dateOfBirthPlaceholder": "اختر تاريخ ميلادك",
+    "dateOfBirthHint": "يُستخدم في ملفك الشخصي. لا يُعرض لآخرين أبداً.",
+    "gender": "الجنس",
+    "genderFemale": "أنثى",
+    "genderMale": "ذكر",
+    "genderOther": "آخر",
+    "genderUndisclosed": "أفضّل عدم الإفصاح",
+    "genderPlaceholder": "اختر الجنس",
+    "roleHr": "الموارد البشرية",
+    "roleHrHint": "نفس صلاحيات المسؤول، بمسمّى الموارد البشرية",
+    "accountTypePlaceholder": "اختر نوع الحساب"
   },
   "biometric": {
     "title": "أمِّن حسابك",
@@ -111,7 +129,7 @@
     "feed": "المستجدات",
     "settings": "الإعدادات",
     "attendance": "Bio Attendance",
-    "action": "تسجيل"
+    "action": "مساحة العمل"
   },
   "feed": {
     "title": "المستجدات",
@@ -300,7 +318,59 @@
     "actionLead": "انظر إلى الكاميرا ويُسجَّل حضورك تلقائياً.",
     "actionLast": "آخر تسجيل على هذا الجهاز",
     "actionNone": "لا يوجد شيء مسجل على هذا الجهاز اليوم.",
-    "actionAdminOnly": "تسجيل الوجوه وسجلات الجميع متاحة في حساب المسؤول."
+    "actionAdminOnly": "تسجيل الوجوه وسجلات الجميع متاحة في حساب المسؤول.",
+    "location": {
+      "title": "الموقع والنطاق",
+      "subtitle": "سجّل مكان كل تسجيل حضور، وارفض عند الرغبة التسجيلات خارج مقر العمل.",
+      "adminAction": "الموقع والنطاق",
+      "sectionRecording": "التسجيل",
+      "captureLabel": "تسجيل مكان كل حضور",
+      "captureHint": "يُحفظ خط العرض والطول وأقرب عنوان مع كل دخول وخروج.",
+      "sectionFence": "فحص النطاق",
+      "enforceLabel": "قبول التسجيل داخل النطاق فقط",
+      "enforceHint": "يُرفض أي تسجيل خارج المنطقة ولا يُحفظ شيء.",
+      "enforceNeedsCapture": "فعّل التسجيل أولاً.",
+      "enforceNeedsCentre": "حدّد مركزاً أولاً.",
+      "centreTitle": "مركز مقر العمل",
+      "centreNone": "لم يُحدّد مركز بعد",
+      "useCurrent": "تحديد موقعي الحالي",
+      "pinning": "جارٍ تحديد الموقع…",
+      "repin": "إعادة التحديد إلى مكاني الآن",
+      "radiusTitle": "النطاق المسموح",
+      "labelField": "اسم المكان",
+      "labelPlaceholder": "مثلاً المقر الرئيسي",
+      "updatedAt": "آخر تغيير {{date}}",
+      "yourPosition": "أين أنت الآن",
+      "checking": "جارٍ الفحص…",
+      "distanceFromCentre": "{{distance}} من المركز",
+      "insideNow": "أنت داخل المنطقة المسموحة",
+      "outsideNow": "أنت خارج المنطقة المسموحة",
+      "atLabel": "في",
+      "none": "لم يُسجّل الموقع",
+      "accuracy": "±{{meters}}",
+      "refusedTitle": "خارج مقر العمل",
+      "refusedBody": "أنت على بُعد {{distance}} من {{place}}. لا يُقبل التسجيل إلا داخل {{radius}}.",
+      "refusedBodyUnnamed": "أنت على بُعد {{distance}}. لا يُقبل التسجيل إلا داخل {{radius}} من مقر العمل.",
+      "thisPlace": "مقر العمل",
+      "userStatusOff": "لا يُسجّل الموقع مع الحضور.",
+      "userStatusCapture": "كل تسجيل يحفظ مكانك.",
+      "userStatusEnforced": "يجب أن تكون داخل {{radius}} من {{place}} لتسجيل الدخول أو الخروج.",
+      "privacyNote": "تبقى الإحداثيات على هذا الجهاز. تُرسل الإحداثيات وحدها إلى خدمة خرائط لتحويلها إلى عنوان — وليس اسمك أو معرّفك أو وجهك.",
+      "error": {
+        "permission": "يلزم الوصول إلى الموقع لتسجيل الحضور. اسمح به ثم أعد المحاولة.",
+        "blocked": "الوصول إلى الموقع معطّل لـ Zaltrix. فعّله من إعدادات النظام.",
+        "unavailable": "الموقع غير متاح على هذا الجهاز.",
+        "timeout": "تعذر تحديد الموقع. انتقل إلى مكان مكشوف ثم أعد المحاولة.",
+        "failed": "تعذر قراءة موقعك. أعد المحاولة."
+      },
+      "openSettings": "فتح الإعدادات",
+      "summaryOff": "معطّل — لا يُسجّل الموقع",
+      "summaryCapture": "تسجيل الموقع · دون فحص النطاق",
+      "summaryEnforced": "تسجيل الموقع · داخل {{radius}} من {{place}}",
+      "allow": "السماح بالموقع",
+      "permissionWhy": "يُسجّل مكان كل حضور، لذا يحتاج Zaltrix إلى إذن الموقع."
+    },
+    "punchDate": "{{date}} الساعة {{time}}"
   },
   "settings": {
     "title": "الإعدادات",
@@ -361,7 +431,11 @@
     "notSet": "غير محدد",
     "edit": "تعديل",
     "photoHint": "اضغط على الصورة لتغييرها",
-    "memberSinceLabel": "عضو منذ"
+    "memberSinceLabel": "عضو منذ",
+    "dateOfBirth": "تاريخ الميلاد",
+    "gender": "الجنس",
+    "age": "{{count}} عاماً",
+    "role": "نوع الحساب"
   },
   "language": {
     "title": "اللغة",
@@ -443,5 +517,109 @@
     "s8Title": "٨. التواصل",
     "s8Body": "يمكن إرسال الأسئلة المتعلقة بهذه الشروط إلى legal@zaltrix.app. نقرأ كل رسالة ونردّ خلال خمسة أيام عمل.",
     "accept": "فهمت"
+  },
+  "workspace": {
+    "title": "مساحة العمل",
+    "subtitle": "حضورك وراتبك وأسفارك في مكان واحد.",
+    "sectionAttendance": "الحضور",
+    "sectionSalary": "الراتب",
+    "sectionBookings": "الحجوزات",
+    "seeAll": "عرض الكل",
+    "staticNote": "بيانات الراتب والحجوزات في هذه النسخة تجريبية.",
+    "salary": {
+      "title": "الراتب",
+      "lead": "قسيمة واحدة لكل شهر. اضغط على الشهر لعرض التفاصيل.",
+      "net": "الصافي",
+      "gross": "الإجمالي",
+      "deductions": "الاستقطاعات",
+      "earnings": "المستحقات",
+      "paidOn": "دُفع في {{date}}",
+      "empty": "لا توجد قسائم بعد.",
+      "thisMonth": "هذا الشهر",
+      "status": {
+        "paid": "مدفوع",
+        "pending": "معلّق",
+        "processing": "قيد المعالجة"
+      },
+      "component": {
+        "basic": "الراتب الأساسي",
+        "hra": "بدل السكن",
+        "allowance": "بدلات أخرى",
+        "providentFund": "صندوق الادخار",
+        "tax": "ضريبة الدخل"
+      },
+      "payslipTitle": "قسيمة الراتب",
+      "gateTitle": "أكّد أنك أنت",
+      "gateLead": "تُظهر قسائمك راتبك، لذا يُطلب كلمة مرور حسابك قبل عرضها.",
+      "gateLocked": "كلمة المرور مطلوبة"
+    },
+    "bookings": {
+      "title": "الحجوزات",
+      "lead": "رحلات وفنادق وسيارات وقطارات محجوزة لك.",
+      "empty": "لا توجد حجوزات بعد.",
+      "reference": "المرجع {{reference}}",
+      "nights": "{{count}} ليالٍ",
+      "oneNight": "ليلة واحدة",
+      "upcoming": "القادمة",
+      "type": {
+        "flight": "رحلة",
+        "hotel": "فندق",
+        "car": "سيارة",
+        "train": "قطار",
+        "bus": "حافلة"
+      },
+      "status": {
+        "new": "جديد",
+        "confirmed": "مؤكد",
+        "completed": "مكتمل",
+        "cancelled": "ملغى"
+      },
+      "chooseType": "ما الذي حُجز",
+      "typeCount": "{{count}} محجوزة",
+      "typeNone": "لا شيء بعد",
+      "typeTitle": "حجوزات {{type}}",
+      "summaryCount": "{{count}} حجوزات",
+      "summaryNext": "الرحلة التالية · {{date}}",
+      "summaryNone": "لا شيء قادم",
+      "nextShort": "التالية {{date}}",
+      "lastShort": "الأخيرة {{date}}",
+      "latest": "الأحدث",
+      "openType": "يفتح كل حجوزات {{type}}"
+    },
+    "salaryCard": "{{month}} · ••••••",
+    "salaryCardEmpty": "لا توجد قسائم بعد",
+    "bookingsCard": "{{count}} محجوزة · التالية {{next}}",
+    "bookingsCardNone": "{{count}} محجوزة",
+    "bookingsCardEmpty": "لا شيء محجوز",
+    "openHint": "يفتح القائمة الكاملة",
+    "sectionMine": "خاصتُك",
+    "newBooking": {
+      "title": "حجز جديد",
+      "add": "إضافة",
+      "chooseType": "ما الذي تحجزه؟",
+      "details": "التفاصيل",
+      "when": "متى",
+      "titleLabel": "المسار أو المكان",
+      "titlePlaceholderTravel": "مثلاً دلهي → بنغالورو",
+      "titlePlaceholderStay": "مثلاً تاج إم جي رود",
+      "referenceLabel": "المرجع أو PNR",
+      "referencePlaceholder": "مثلاً AI-2841",
+      "amountLabel": "المبلغ",
+      "amountPlaceholder": "0",
+      "startLabel": "يبدأ",
+      "startPlaceholder": "اختر تاريخاً",
+      "endLabel": "ينتهي",
+      "endPlaceholder": "اختر تاريخاً",
+      "endOptional": "اتركه فارغاً لرحلة ذهاب فقط.",
+      "submit": "إضافة الحجز",
+      "saving": "جارٍ الحفظ…",
+      "added": "تمت إضافة {{title}}. يظهر كجديد حتى يُصدر.",
+      "errorType": "اختر ما تحجزه.",
+      "errorTitle": "أدخل المسار أو المكان.",
+      "errorReference": "أدخل المرجع أو PNR.",
+      "errorAmount": "أدخل المبلغ.",
+      "errorStart": "اختر موعد البدء.",
+      "errorEndBefore": "لا يمكن أن تكون النهاية قبل البداية."
+    }
   }
 }

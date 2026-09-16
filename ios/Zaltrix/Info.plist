@@ -42,6 +42,8 @@
 	</dict>
 	<key>NSCameraUsageDescription</key>
 	<string>Zaltrix uses the camera to register your face and to mark attendance. Face data is processed on this device and never uploaded.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Zaltrix records where each punch in and punch out happened, and can require you to be inside your workplace before a punch is accepted.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Zaltrix uses Face ID to unlock your account quickly and keep it secure.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>

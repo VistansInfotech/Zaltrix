@@ -5,6 +5,8 @@ import type {
 } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 
+import type { BookingType } from '../services/workspaceData';
+
 export type AuthStackParamList = {
   Welcome: undefined;
   SignUp: undefined;
@@ -40,26 +42,39 @@ export type AttendanceStackParamList = {
   RegisteredUsers: undefined;
   /** One person's punch history. */
   PersonAttendance: { personId: string };
+  /** Admin-only: where attendance may be marked, and whether that is enforced. */
+  Geofence: undefined;
   MarkAttendance: undefined;
 };
 
-/** The cut-down stack a non-admin account gets in place of attendance. */
-export type ActionStackParamList = {
-  ActionHome: undefined;
+/** Everything that is about *this* person: their punches, pay and travel. */
+export type WorkspaceStackParamList = {
+  WorkspaceHome: undefined;
   MarkAttendance: undefined;
+  /** Account password, asked before payslips are shown at all. */
+  SalaryGate: undefined;
+  Salary: undefined;
+  /** One payslip, by its id. */
+  Payslip: { id: string };
+  /** The four kinds of booking, as blocks. */
+  Bookings: undefined;
+  /** Every booking of one kind. */
+  BookingList: { type: BookingType };
+  /** The form for raising a booking by hand. */
+  NewBooking: undefined;
 };
 
 export type MainTabParamList = {
   Feed: undefined;
   /** Present only for admin accounts. */
   AttendanceTab: NavigatorScreenParams<AttendanceStackParamList>;
-  /** Present only for non-admin accounts. */
-  ActionTab: NavigatorScreenParams<ActionStackParamList>;
+  /** Everyone's own corner: attendance, salary and bookings. */
+  WorkspaceTab: NavigatorScreenParams<WorkspaceStackParamList>;
   SettingsTab: NavigatorScreenParams<SettingsStackParamList>;
 };
 
-export type ActionStackScreenProps<T extends keyof ActionStackParamList> =
-  NativeStackScreenProps<ActionStackParamList, T>;
+export type WorkspaceStackScreenProps<T extends keyof WorkspaceStackParamList> =
+  NativeStackScreenProps<WorkspaceStackParamList, T>;
 
 export type AuthStackScreenProps<T extends keyof AuthStackParamList> =
   NativeStackScreenProps<AuthStackParamList, T>;

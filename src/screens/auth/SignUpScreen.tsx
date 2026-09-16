@@ -1,11 +1,22 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
-import type { UserRole } from '../../types';
+import {
+  ageFrom,
+  GENDERS,
+  MAX_AGE_YEARS,
+  MIN_AGE_YEARS,
+  toDateKey,
+  USER_ROLES,
+  type Gender,
+  type UserRole,
+} from '../../types';
 import Banner from '../../components/Banner';
 import Button from '../../components/Button';
+import DateField from '../../components/DateField';
 import Logo from '../../components/Logo';
 import Screen from '../../components/Screen';
+import SelectField from '../../components/SelectField';
 import TextField, { TextFieldHandle } from '../../components/TextField';
 import { useAuth } from '../../context/AuthContext';
 import { usePreferences } from '../../context/PreferencesContext';
@@ -18,16 +29,37 @@ import {
 import type { AuthStackScreenProps } from '../../navigation/types';
 import AuthHeader from './AuthHeader';
 
-type Errors = Partial<Record<'name' | 'email' | 'password' | 'confirm', string>>;
+type Errors = Partial<
+  Record<'name' | 'email' | 'dob' | 'gender' | 'password' | 'confirm', string>
+>;
+
+/** Copy keys per role, so the card list stays a plain map over USER_ROLES. */
+const ROLE_KEYS: Record<UserRole, { label: string; hint: string }> = {
+  user: { label: 'auth.roleUser', hint: 'auth.roleUserHint' },
+  hr: { label: 'auth.roleHr', hint: 'auth.roleHrHint' },
+  admin: { label: 'auth.roleAdmin', hint: 'auth.roleAdminHint' },
+};
+
+/** Years back from today, at local midnight. */
+function yearsAgo(years: number): Date {
+  const date = new Date();
+  date.setFullYear(date.getFullYear() - years);
+  date.setHours(0, 0, 0, 0);
+  return date;
+}
 
 export default function SignUpScreen({ navigation }: AuthStackScreenProps<'SignUp'>) {
   const colors = useColors();
   const styles = useThemedStyles(makeStyles);
-  const { t } = usePreferences();
+  const { t, language } = usePreferences();
   const { signUp } = useAuth();
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [dob, setDob] = useState<Date | null>(null);
+  // No default. A pre-selected gender is an answer the form gave on someone's
+  // behalf, and most people would never notice it had.
+  const [gender, setGender] = useState<Gender | null>(null);
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [errors, setErrors] = useState<Errors>({});
@@ -43,6 +75,40 @@ export default function SignUpScreen({ navigation }: AuthStackScreenProps<'SignU
 
   const strength = useMemo(() => passwordStrength(password), [password]);
 
+  // Hoisted out of render: these are the picker's bounds, not per-keystroke
+  // values, and `new Date()` inside the JSX would hand it a new object each time.
+  const oldest = useMemo(() => yearsAgo(MAX_AGE_YEARS), []);
+  const today = useMemo(() => {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    return now;
+  }, []);
+  /** Where the wheel opens when nothing is chosen — a plausible working age. */
+  const openAt = useMemo(() => yearsAgo(25), []);
+
+  // Rebuilt when the language changes, not on every keystroke.
+  const genderOptions = useMemo(
+    () =>
+      GENDERS.map(value => ({
+        value,
+        label: t(`auth.gender${value.charAt(0).toUpperCase()}${value.slice(1)}`),
+      })),
+    [t],
+  );
+
+  const roleOptions = useMemo(
+    () =>
+      USER_ROLES.map(value => ({
+        value,
+        label: t(ROLE_KEYS[value].label),
+        // What the role actually grants, shown against each option in the
+        // sheet — this is a permission, not a preference, and picking one
+        // blind is how somebody ends up an admin by accident.
+        hint: t(ROLE_KEYS[value].hint),
+      })),
+    [t],
+  );
+
   function validate(): boolean {
     const next: Errors = {};
 
@@ -56,6 +122,20 @@ export default function SignUpScreen({ navigation }: AuthStackScreenProps<'SignU
       next.email = t('auth.errors.emailRequired');
     } else if (!isValidEmail(email)) {
       next.email = t('auth.errors.emailInvalid');
+    }
+
+    if (!dob) {
+      next.dob = t('auth.errors.dobRequired');
+    } else if (dob > today) {
+      next.dob = t('auth.errors.dobFuture');
+    } else if (dob < oldest) {
+      next.dob = t('auth.errors.dobImplausible');
+    } else if (ageFrom(dob) < MIN_AGE_YEARS) {
+      next.dob = t('auth.errors.dobTooYoung', { years: MIN_AGE_YEARS });
+    }
+
+    if (!gender) {
+      next.gender = t('auth.errors.genderRequired');
     }
 
     if (!password) {
@@ -79,7 +159,16 @@ export default function SignUpScreen({ navigation }: AuthStackScreenProps<'SignU
     }
 
     setSubmitting(true);
-    const result = await signUp(name, email, password, role);
+    const result = await signUp({
+      name,
+      email,
+      password,
+      role,
+      // Validated above, so the non-null assertions hold; stored as a calendar
+      // day rather than an instant so the birthday never shifts across zones.
+      dateOfBirth: toDateKey(dob!),
+      gender,
+    });
     setSubmitting(false);
 
     if (!result.ok) {
@@ -130,8 +219,42 @@ export default function SignUpScreen({ navigation }: AuthStackScreenProps<'SignU
         keyboardType="email-address"
         autoComplete="email"
         textContentType="emailAddress"
-        returnKeyType="next"
-        onSubmitEditing={() => passwordRef.current?.focus()}
+        returnKeyType="done"
+      />
+
+      <DateField
+        label={t('auth.dateOfBirth')}
+        placeholder={t('auth.dateOfBirthPlaceholder')}
+        hint={t('auth.dateOfBirthHint')}
+        value={dob}
+        onChange={setDob}
+        error={errors.dob}
+        minimumDate={oldest}
+        maximumDate={today}
+        initialDate={openAt}
+        locale={language}
+        doneLabel={t('common.done')}
+        closeLabel={t('common.close')}
+      />
+
+      <SelectField
+        label={t('auth.gender')}
+        placeholder={t('auth.genderPlaceholder')}
+        value={gender}
+        onChange={setGender}
+        options={genderOptions}
+        error={errors.gender}
+        closeLabel={t('common.close')}
+      />
+
+      <SelectField
+        label={t('auth.accountType')}
+        placeholder={t('auth.accountTypePlaceholder')}
+        value={role}
+        onChange={setRole}
+        options={roleOptions}
+        hint={t(ROLE_KEYS[role].hint)}
+        closeLabel={t('common.close')}
       />
 
       <TextField
@@ -188,39 +311,6 @@ export default function SignUpScreen({ navigation }: AuthStackScreenProps<'SignU
         onSubmitEditing={onSubmit}
       />
 
-      <Text style={styles.roleHeading}>{t('auth.accountType')}</Text>
-      <View style={styles.roleRow}>
-        {(['user', 'admin'] as const).map(option => {
-          const selected = role === option;
-          return (
-            <Pressable
-              key={option}
-              onPress={() => setRole(option)}
-              accessibilityRole="radio"
-              accessibilityState={{ selected }}
-              accessibilityLabel={t(
-                option === 'admin' ? 'auth.roleAdmin' : 'auth.roleUser',
-              )}
-              accessibilityHint={t(
-                option === 'admin' ? 'auth.roleAdminHint' : 'auth.roleUserHint',
-              )}
-              style={({ pressed }) => [
-                styles.roleCard,
-                selected && styles.roleCardSelected,
-                pressed && styles.rolePressed,
-              ]}>
-              <Text
-                style={[styles.roleLabel, selected && styles.roleLabelSelected]}>
-                {t(option === 'admin' ? 'auth.roleAdmin' : 'auth.roleUser')}
-              </Text>
-              <Text style={styles.roleHint}>
-                {t(option === 'admin' ? 'auth.roleAdminHint' : 'auth.roleUserHint')}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </View>
-
       <Button
         label={t('auth.signUp')}
         onPress={onSubmit}
@@ -267,30 +357,6 @@ const makeStyles = (c: AppColors) =>
       backgroundColor: c.border,
     },
     strengthLabel: { ...typography.caption, color: c.textTertiary },
-    roleHeading: {
-      ...typography.caption,
-      color: c.textSecondary,
-      fontWeight: '700',
-      textTransform: 'uppercase',
-      letterSpacing: 0.8,
-      marginTop: spacing.md,
-      marginBottom: spacing.sm,
-    },
-    roleRow: { flexDirection: 'row', gap: spacing.sm },
-    roleCard: {
-      flex: 1,
-      padding: spacing.md,
-      borderRadius: radius.md,
-      borderWidth: 1.5,
-      borderColor: c.border,
-      backgroundColor: c.surface,
-      gap: 2,
-    },
-    roleCardSelected: { borderColor: c.primary, backgroundColor: c.primarySoft },
-    rolePressed: { opacity: 0.7 },
-    roleLabel: { ...typography.bodyStrong, color: c.textPrimary },
-    roleLabelSelected: { color: c.primary },
-    roleHint: { ...typography.caption, color: c.textSecondary, fontSize: 11 },
     submit: { marginTop: spacing.sm },
     terms: {
       ...typography.caption,

@@ -8,6 +8,7 @@ export type IconName =
   | 'settings'
   | 'chevronRight'
   | 'chevronLeft'
+  | 'chevronDown'
   | 'user'
   | 'globe'
   | 'bell'
@@ -18,6 +19,7 @@ export type IconName =
   | 'faceId'
   | 'fingerprint'
   | 'check'
+  | 'checkCircle'
   | 'close'
   | 'eye'
   | 'eyeOff'
@@ -26,6 +28,16 @@ export type IconName =
   | 'info'
   | 'contrast'
   | 'camera'
+  | 'mapPin'
+  | 'crosshair'
+  | 'calendar'
+  | 'wallet'
+  | 'hotel'
+  | 'flight'
+  | 'car'
+  | 'train'
+  | 'bus'
+  | 'ticket'
   | 'external';
 
 type Props = {
@@ -94,6 +106,8 @@ function renderPaths(
       return <Path d="M9 18l6-6-6-6" {...p} />;
     case 'chevronLeft':
       return <Path d="M15 18l-6-6 6-6" {...p} />;
+    case 'chevronDown':
+      return <Path d="M6 9l6 6 6-6" {...p} />;
     case 'user':
       return (
         <>
@@ -169,6 +183,15 @@ function renderPaths(
       );
     case 'check':
       return <Path d="M20 6L9 17l-5-5" {...p} />;
+    // The bare check floats; the ring gives it the same enclosed silhouette as
+    // the other tab icons so the row reads as one set.
+    case 'checkCircle':
+      return (
+        <>
+          <Circle cx="12" cy="12" r="9" {...p} />
+          <Path d="M8.2 12.3l2.6 2.6 5-5.2" {...p} />
+        </>
+      );
     case 'close':
       return (
         <>
@@ -214,6 +237,99 @@ function renderPaths(
           <Path d="M21 4H8L2 12l6 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z" {...p} />
           <Line x1="17" y1="9" x2="11" y2="15" {...p} />
           <Line x1="11" y1="9" x2="17" y2="15" {...p} />
+        </>
+      );
+    case 'calendar':
+      return (
+        <>
+          <Rect x="3" y="5" width="18" height="16" rx="2.5" {...p} />
+          <Line x1="3" y1="9.5" x2="21" y2="9.5" {...p} />
+          <Line x1="8" y1="2.8" x2="8" y2="6.2" {...p} />
+          <Line x1="16" y1="2.8" x2="16" y2="6.2" {...p} />
+        </>
+      );
+    case 'wallet':
+      return (
+        <>
+          <Path d="M3 7.5A2.5 2.5 0 0 1 5.5 5H18a2 2 0 0 1 2 2v1" {...p} />
+          <Rect x="3" y="7.5" width="18" height="12.5" rx="2.5" {...p} />
+          <Path d="M21 12h-4a2 2 0 0 0 0 4h4" {...p} />
+        </>
+      );
+    case 'hotel':
+      return (
+        <>
+          <Path d="M2 4v16" {...p} />
+          <Path d="M2 9h18a2 2 0 0 1 2 2v9" {...p} />
+          <Path d="M2 17h20" {...p} />
+          <Path d="M6 9v8" {...p} />
+        </>
+      );
+    case 'flight':
+      return (
+        <Path
+          d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"
+          {...p}
+        />
+      );
+    case 'car':
+      return (
+        <>
+          <Path
+            d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"
+            {...p}
+          />
+          <Circle cx="7" cy="17" r="2" {...p} />
+          <Path d="M9 17h6" {...p} />
+          <Circle cx="17" cy="17" r="2" {...p} />
+        </>
+      );
+    case 'train':
+      return (
+        <>
+          <Path d="M9 19c-2.8 0-5-2.2-5-5v-4a8 8 0 0 1 16 0v4c0 2.8-2.2 5-5 5z" {...p} />
+          <Path d="M8 3.1V7a4 4 0 0 0 8 0V3.1" {...p} />
+          <Path d="M4 13h16" {...p} />
+          <Path d="m8 19-2 3" {...p} />
+          <Path d="m16 19 2 3" {...p} />
+        </>
+      );
+    case 'bus':
+      return (
+        <>
+          <Path d="M4 17V7a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v10" {...p} />
+          <Path d="M4 11h16" {...p} />
+          <Path d="M3 17h18" {...p} />
+          <Circle cx="7.5" cy="17" r="1" {...p} />
+          <Circle cx="16.5" cy="17" r="1" {...p} />
+          <Path d="M6 20v-2" {...p} />
+          <Path d="M18 20v-2" {...p} />
+        </>
+      );
+    case 'ticket':
+      return (
+        <>
+          <Path d="M4 8.5V7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1.5a2.2 2.2 0 0 0 0 4.4V17a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-4.1a2.2 2.2 0 0 0 0-4.4z" {...p} />
+          <Line x1="13" y1="7" x2="13" y2="17" strokeDasharray="2 2.4" {...p} />
+        </>
+      );
+    case 'mapPin':
+      return (
+        <>
+          <Path d="M12 21.5s7-5.6 7-11a7 7 0 1 0-14 0c0 5.4 7 11 7 11z" {...p} />
+          <Circle cx="12" cy="10.5" r="2.6" {...p} />
+        </>
+      );
+    // A radius, not a place: the ring is the fence and the centre is the pin.
+    case 'crosshair':
+      return (
+        <>
+          <Circle cx="12" cy="12" r="8.5" {...p} />
+          <Circle cx="12" cy="12" r="2" {...p} />
+          <Line x1="12" y1="1.8" x2="12" y2="5" {...p} />
+          <Line x1="12" y1="19" x2="12" y2="22.2" {...p} />
+          <Line x1="1.8" y1="12" x2="5" y2="12" {...p} />
+          <Line x1="19" y1="12" x2="22.2" y2="12" {...p} />
         </>
       );
     case 'camera':

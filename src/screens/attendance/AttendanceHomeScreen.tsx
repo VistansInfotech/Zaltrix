@@ -14,6 +14,9 @@ import {
   listAttendance,
   listEnrolled,
 } from '../../services/attendanceStore';
+import { readGeofence, type GeofenceConfig } from '../../services/geofenceStore';
+import { describeLocation } from '../../services/locationService';
+import { describeGeofence } from './geofenceCopy';
 import {
   AppColors,
   radius,
@@ -33,6 +36,7 @@ export default function AttendanceHomeScreen({
 
   const [people, setPeople] = useState<EnrolledPerson[]>([]);
   const [log, setLog] = useState<AttendanceRecord[]>([]);
+  const [fence, setFence] = useState<GeofenceConfig | null>(null);
 
   // Set by the register screen on its way back here.
   const justRegistered = route.params?.registered;
@@ -42,13 +46,15 @@ export default function AttendanceHomeScreen({
     useCallback(() => {
       let active = true;
       void (async () => {
-        const [enrolled, records] = await Promise.all([
+        const [enrolled, records, geofence] = await Promise.all([
           listEnrolled(),
           listAttendance(),
+          readGeofence(),
         ]);
         if (active) {
           setPeople(enrolled);
           setLog(records);
+          setFence(geofence);
         }
       })();
       return () => {
@@ -59,6 +65,10 @@ export default function AttendanceHomeScreen({
 
   const today = new Date().toDateString();
   const todayCount = log.filter(r => new Date(r.at).toDateString() === today).length;
+
+  // Says what is actually happening rather than just "configured". The state
+  // itself is worked out in one shared place — see summariseGeofence.
+  const fenceSummary = describeGeofence(fence, t);
 
   return (
     <Screen scroll contentStyle={styles.content}>
@@ -96,6 +106,14 @@ export default function AttendanceHomeScreen({
         disabled={people.length === 0}
         onPress={() => navigation.navigate('MarkAttendance')}
         primary
+      />
+
+      <Action
+        icon="mapPin"
+        title={t('attendance.location.adminAction')}
+        subtitle={fenceSummary}
+        onPress={() => navigation.navigate('Geofence')}
+        tone="accent"
       />
 
       <SectionHeader title={t('attendance.sectionPeople')} />
@@ -341,6 +359,11 @@ function RegistrationRow({
           {status}
           {punches > 0 ? ` · ${t('attendance.punchCount', { count: punches })}` : ''}
         </Text>
+        {lastToday?.location ? (
+          <Text style={styles.regPlace} numberOfLines={1}>
+            {t('attendance.location.atLabel')} · {describeLocation(lastToday.location)}
+          </Text>
+        ) : null}
       </View>
     </Pressable>
   );
@@ -453,6 +476,7 @@ const makeStyles = (c: AppColors) =>
       fontSize: 11,
       marginTop: 2,
     },
+    regPlace: { ...typography.caption, color: c.textTertiary, fontSize: 11 },
     regStatusIn: { color: c.success, fontWeight: '600' },
     regStatusOut: { color: c.accentStrong, fontWeight: '600' },
 

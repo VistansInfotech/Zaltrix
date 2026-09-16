@@ -19,8 +19,13 @@ prepare_react_native_project!
 
 # react-native-permissions: only compile the permission handlers we actually use.
 permissions_path = File.join(__dir__, '..', 'node_modules', 'react-native-permissions', 'ios')
+# Each handler is a separate pod; a permission checked from JS without its
+# handler compiled in raises "No ... permission handler detected" at runtime,
+# not at build time — so this list has to be kept in step with the permissions
+# the app actually asks for.
 setup_permissions([
   'Camera',
+  'LocationWhenInUse',
   'Notifications',
   'PhotoLibrary',
 ])

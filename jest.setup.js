@@ -50,6 +50,15 @@ jest.mock('react-native-biometrics', () => ({
 jest.mock('react-native-permissions', () => ({
   checkNotifications: jest.fn().mockResolvedValue({ status: 'denied' }),
   requestNotifications: jest.fn().mockResolvedValue({ status: 'granted' }),
+  check: jest.fn().mockResolvedValue('denied'),
+  request: jest.fn().mockResolvedValue('granted'),
+  PERMISSIONS: {
+    IOS: { LOCATION_WHEN_IN_USE: 'ios.permission.LOCATION_WHEN_IN_USE' },
+    ANDROID: {
+      ACCESS_FINE_LOCATION: 'android.permission.ACCESS_FINE_LOCATION',
+      ACCESS_COARSE_LOCATION: 'android.permission.ACCESS_COARSE_LOCATION',
+    },
+  },
   RESULTS: {
     UNAVAILABLE: 'unavailable',
     DENIED: 'denied',
@@ -130,6 +139,42 @@ jest.mock('react-native-nitro-sound', () => ({
     setVolume: jest.fn().mockResolvedValue(''),
   }),
 }));
+
+jest.mock('@react-native-community/geolocation', () => ({
+  __esModule: true,
+  default: {
+    setRNConfiguration: jest.fn(),
+    // Bengaluru, so a test that forgets to stub gets a plausible fix rather
+    // than null island off the coast of Africa.
+    getCurrentPosition: jest.fn((success) =>
+      success({ coords: { latitude: 12.9716, longitude: 77.5946, accuracy: 12 } }),
+    ),
+    watchPosition: jest.fn(),
+    clearWatch: jest.fn(),
+  },
+}));
+
+/*
+ * No test may reach the network.
+ *
+ * reverseGeocode calls OpenStreetMap's public geocoder, and without this the
+ * suite really did query it — tests that pass or fail on whether the machine
+ * is online, against a free service, from every run on every dev box and CI
+ * job. Failing the fetch is also the honest default: the app is built to work
+ * when the lookup cannot be made, so that is the path tests should exercise.
+ * A test that wants a successful lookup can mock global.fetch itself.
+ */
+global.fetch = jest.fn(() =>
+  Promise.reject(new Error('Network request blocked in tests')),
+);
+
+jest.mock('@react-native-community/datetimepicker', () => {
+  const React = require('react');
+  const { View } = require('react-native');
+  const Picker = (props) =>
+    React.createElement(View, { testID: 'DateTimePicker', ...props });
+  return { __esModule: true, default: Picker };
+});
 
 jest.mock('react-native-image-picker', () => ({
   launchCamera: jest.fn(),

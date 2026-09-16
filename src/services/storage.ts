@@ -10,6 +10,8 @@ export const StorageKeys = {
   onboarded: '@zaltrix/onboarded',
   enrolledFaces: '@zaltrix/enrolled-faces',
   attendanceLog: '@zaltrix/attendance-log',
+  geofence: '@zaltrix/geofence',
+  bookings: '@zaltrix/bookings',
 } as const;
 
 export async function readJSON<T>(key: string, fallback: T): Promise<T> {

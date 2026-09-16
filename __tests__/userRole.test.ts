@@ -6,7 +6,13 @@
  * the ones where the role is missing or malformed: those must land on the
  * *lesser* privilege, never on admin.
  */
-import { DEFAULT_ROLE, roleOf, type User } from '../src/types';
+import {
+  canManageAttendance,
+  DEFAULT_ROLE,
+  roleOf,
+  USER_ROLES,
+  type User,
+} from '../src/types';
 
 function account(overrides: Partial<User> = {}): User {
   return {
@@ -47,6 +53,51 @@ describe('roleOf', () => {
     // able to grant admin by being anything other than 'user'.
     const odd = account({ role: 'ADMIN' as never });
     expect(roleOf(odd) === 'admin').toBe(false);
+  });
+
+  it('reads an explicit hr role', () => {
+    expect(roleOf(account({ role: 'hr' }))).toBe('hr');
+  });
+
+  it('falls back to the lesser privilege for an unknown role', () => {
+    // Not merely "not admin" — a value this build does not know must resolve
+    // to the least it could mean, including one a newer build might write.
+    expect(roleOf(account({ role: 'superuser' as never }))).toBe('user');
+    expect(roleOf(account({ role: 'Hr' as never }))).toBe('user');
+    expect(roleOf(account({ role: '' as never }))).toBe('user');
+  });
+});
+
+describe('canManageAttendance', () => {
+  it('grants the attendance tab to admin and hr', () => {
+    expect(canManageAttendance('admin')).toBe(true);
+    expect(canManageAttendance('hr')).toBe(true);
+  });
+
+  it('withholds it from an ordinary user', () => {
+    expect(canManageAttendance('user')).toBe(false);
+  });
+
+  it('withholds it from an unrecognised role', () => {
+    // The gate reads roleOf's output, so an unknown value has already become
+    // 'user' by the time it gets here — but check the floor directly too.
+    expect(canManageAttendance(roleOf({ role: 'nonsense' as never }))).toBe(false);
+  });
+
+  it('covers every role, so a new one cannot be silently unhandled', () => {
+    for (const role of USER_ROLES) {
+      expect(typeof canManageAttendance(role)).toBe('boolean');
+    }
+  });
+});
+
+describe('USER_ROLES', () => {
+  it('offers all three, least privileged first', () => {
+    expect([...USER_ROLES]).toEqual(['user', 'hr', 'admin']);
+  });
+
+  it('starts with the default, so the first card is the safe one', () => {
+    expect(USER_ROLES[0]).toBe(DEFAULT_ROLE);
   });
 });
 

@@ -14,7 +14,8 @@
     "enable": "Enable",
     "notNow": "Not now",
     "required": "This field is required",
-    "clear": "Clear"
+    "clear": "Clear",
+    "close": "Close"
   },
   "welcome": {
     "tagline": "Automate. Elevate. Dominate.",
@@ -53,7 +54,12 @@
       "passwordWeak": "Use letters and numbers for a stronger password",
       "confirmMismatch": "Passwords do not match",
       "accountExists": "An account with this email already exists",
-      "invalidCredentials": "Incorrect email or password"
+      "invalidCredentials": "Incorrect email or password",
+      "dobRequired": "Please choose your date of birth",
+      "dobFuture": "Date of birth cannot be in the future",
+      "dobTooYoung": "You must be at least {{years}} years old",
+      "dobImplausible": "Please check the year",
+      "genderRequired": "Please choose an option"
     },
     "passwordStrength": {
       "label": "Password strength",
@@ -66,7 +72,19 @@
     "roleAdmin": "Admin",
     "roleUser": "User",
     "roleAdminHint": "Registers faces and sees everyone’s records",
-    "roleUserHint": "Marks their own attendance only"
+    "roleUserHint": "Marks their own attendance only",
+    "dateOfBirth": "Date of birth",
+    "dateOfBirthPlaceholder": "Choose your date of birth",
+    "dateOfBirthHint": "Used on your profile. It is never shown to other people.",
+    "gender": "Gender",
+    "genderFemale": "Female",
+    "genderMale": "Male",
+    "genderOther": "Other",
+    "genderUndisclosed": "Prefer not to say",
+    "genderPlaceholder": "Select your gender",
+    "roleHr": "HR",
+    "roleHrHint": "Same access as an admin, under an HR job title",
+    "accountTypePlaceholder": "Choose an account type"
   },
   "biometric": {
     "title": "Secure your account",
@@ -111,7 +129,7 @@
     "feed": "Feed",
     "settings": "Settings",
     "attendance": "Bio Attendance",
-    "action": "Mark"
+    "action": "Workspace"
   },
   "feed": {
     "title": "Feed",
@@ -300,7 +318,59 @@
     "actionLead": "Look at the camera and your punch is recorded automatically.",
     "actionLast": "Last punch on this device",
     "actionNone": "Nothing recorded on this device today.",
-    "actionAdminOnly": "Registering faces and everyone’s records are available to an admin account."
+    "actionAdminOnly": "Registering faces and everyone’s records are available to an admin account.",
+    "location": {
+      "title": "Location & geofence",
+      "subtitle": "Stamp every punch with where it happened, and optionally refuse punches made away from the workplace.",
+      "adminAction": "Location & geofence",
+      "sectionRecording": "Recording",
+      "captureLabel": "Record where each punch happens",
+      "captureHint": "Latitude, longitude and the nearest address are saved with every punch in and punch out.",
+      "sectionFence": "Radius check",
+      "enforceLabel": "Only accept punches inside the radius",
+      "enforceHint": "A punch made outside the area is refused and nothing is recorded.",
+      "enforceNeedsCapture": "Turn on recording first.",
+      "enforceNeedsCentre": "Pin a centre first.",
+      "centreTitle": "Workplace centre",
+      "centreNone": "No centre pinned yet",
+      "useCurrent": "Pin my current location",
+      "pinning": "Taking a fix…",
+      "repin": "Re-pin to where I am now",
+      "radiusTitle": "Allowed radius",
+      "labelField": "Place name",
+      "labelPlaceholder": "e.g. Head office",
+      "updatedAt": "Last changed {{date}}",
+      "yourPosition": "Where you are now",
+      "checking": "Checking…",
+      "distanceFromCentre": "{{distance}} from the centre",
+      "insideNow": "You are inside the allowed area",
+      "outsideNow": "You are outside the allowed area",
+      "atLabel": "At",
+      "none": "Location not recorded",
+      "accuracy": "±{{meters}}",
+      "refusedTitle": "Outside the workplace",
+      "refusedBody": "You are {{distance}} from {{place}}. Punches are only accepted within {{radius}}.",
+      "refusedBodyUnnamed": "You are {{distance}} away. Punches are only accepted within {{radius}} of the workplace.",
+      "thisPlace": "the workplace",
+      "userStatusOff": "Punches are not location stamped.",
+      "userStatusCapture": "Each punch records where you are.",
+      "userStatusEnforced": "You must be within {{radius}} of {{place}} to punch in or out.",
+      "privacyNote": "Coordinates stay on this device. Only the coordinates are sent out, to a mapping service, to be turned into an address — never your name, ID or face.",
+      "error": {
+        "permission": "Location access is needed to mark attendance. Allow it and try again.",
+        "blocked": "Location access is turned off for Zaltrix. Turn it on in system settings.",
+        "unavailable": "Location is not available on this device.",
+        "timeout": "Could not get a location fix. Move somewhere with a clearer view of the sky and try again.",
+        "failed": "Could not read your location. Please try again."
+      },
+      "openSettings": "Open settings",
+      "summaryOff": "Off — punches are not location stamped",
+      "summaryCapture": "Stamping punches · no radius check",
+      "summaryEnforced": "Stamping punches · within {{radius}} of {{place}}",
+      "allow": "Allow location",
+      "permissionWhy": "Your punches are stamped with where they happen, so Zaltrix needs location access."
+    },
+    "punchDate": "{{date}} at {{time}}"
   },
   "settings": {
     "title": "Settings",
@@ -361,7 +431,11 @@
     "notSet": "Not set",
     "edit": "Edit",
     "photoHint": "Tap the photo to change it",
-    "memberSinceLabel": "Member since"
+    "memberSinceLabel": "Member since",
+    "dateOfBirth": "Date of birth",
+    "gender": "Gender",
+    "age": "{{count}} years old",
+    "role": "Account type"
   },
   "language": {
     "title": "Language",
@@ -443,5 +517,109 @@
     "s8Title": "8. Contact",
     "s8Body": "Questions about these Terms can be sent to legal@zaltrix.app. We read every message and respond within five working days.",
     "accept": "I understand"
+  },
+  "workspace": {
+    "title": "Workspace",
+    "subtitle": "Your attendance, pay and travel in one place.",
+    "sectionAttendance": "Attendance",
+    "sectionSalary": "Salary",
+    "sectionBookings": "Bookings",
+    "seeAll": "See all",
+    "staticNote": "Salary and booking records are sample data on this build.",
+    "salary": {
+      "title": "Salary",
+      "lead": "One payslip per month. Tap a month for the full breakdown.",
+      "net": "Net pay",
+      "gross": "Gross",
+      "deductions": "Deductions",
+      "earnings": "Earnings",
+      "paidOn": "Paid {{date}}",
+      "empty": "No payslips yet.",
+      "thisMonth": "This month",
+      "status": {
+        "paid": "PAID",
+        "pending": "PENDING",
+        "processing": "PROCESSING"
+      },
+      "component": {
+        "basic": "Basic pay",
+        "hra": "House rent allowance",
+        "allowance": "Other allowances",
+        "providentFund": "Provident fund",
+        "tax": "Income tax"
+      },
+      "payslipTitle": "Payslip",
+      "gateTitle": "Confirm it is you",
+      "gateLead": "Your payslips show what you are paid, so your account password is asked for before they are shown.",
+      "gateLocked": "Password required"
+    },
+    "bookings": {
+      "title": "Bookings",
+      "lead": "Flights, hotels, cars and trains booked for you.",
+      "empty": "No bookings yet.",
+      "reference": "Ref {{reference}}",
+      "nights": "{{count}} nights",
+      "oneNight": "1 night",
+      "upcoming": "Upcoming",
+      "type": {
+        "flight": "Flight",
+        "hotel": "Hotel",
+        "car": "Car",
+        "train": "Train",
+        "bus": "Bus"
+      },
+      "status": {
+        "new": "NEW",
+        "confirmed": "CONFIRMED",
+        "completed": "COMPLETED",
+        "cancelled": "CANCELLED"
+      },
+      "chooseType": "What was booked",
+      "typeCount": "{{count}} booked",
+      "typeNone": "None yet",
+      "typeTitle": "{{type}} bookings",
+      "summaryCount": "{{count}} bookings",
+      "summaryNext": "Next trip · {{date}}",
+      "summaryNone": "Nothing coming up",
+      "nextShort": "Next {{date}}",
+      "lastShort": "Last {{date}}",
+      "latest": "Latest",
+      "openType": "Opens every {{type}} booking"
+    },
+    "salaryCard": "{{month}} · ••••••",
+    "salaryCardEmpty": "No payslips yet",
+    "bookingsCard": "{{count}} booked · next {{next}}",
+    "bookingsCardNone": "{{count}} booked",
+    "bookingsCardEmpty": "Nothing booked",
+    "openHint": "Opens the full list",
+    "sectionMine": "Yours",
+    "newBooking": {
+      "title": "New booking",
+      "add": "Add",
+      "chooseType": "What are you booking?",
+      "details": "Details",
+      "when": "When",
+      "titleLabel": "Route or place",
+      "titlePlaceholderTravel": "e.g. Delhi → Bengaluru",
+      "titlePlaceholderStay": "e.g. Taj MG Road, Bengaluru",
+      "referenceLabel": "Reference or PNR",
+      "referencePlaceholder": "e.g. AI-2841",
+      "amountLabel": "Amount",
+      "amountPlaceholder": "0",
+      "startLabel": "Starts",
+      "startPlaceholder": "Choose a date",
+      "endLabel": "Ends",
+      "endPlaceholder": "Choose a date",
+      "endOptional": "Leave empty for a one-way trip or a transfer.",
+      "submit": "Add booking",
+      "saving": "Saving…",
+      "added": "{{title}} added. It shows as NEW until it is ticketed.",
+      "errorType": "Choose what you are booking.",
+      "errorTitle": "Enter a route or place.",
+      "errorReference": "Enter the reference or PNR.",
+      "errorAmount": "Enter an amount.",
+      "errorStart": "Choose when it starts.",
+      "errorEndBefore": "The end cannot be before the start."
+    }
   }
 }
